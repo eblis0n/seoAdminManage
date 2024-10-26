@@ -2,18 +2,19 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-10-08 20:30:06
- * @LastEditTime: 2024-10-20 22:43:27
+ * @LastEditTime: 2024-10-22 00:33:37
  */
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { useUserStoreHook } from "@/store/modules/user";
 import { ResultEnum } from "@/enums/ResultEnum";
-import { TOKEN_KEY } from "@/enums/CacheEnum";
+// 移除未使用的导入
+// import { TOKEN_KEY } from "@/enums/CacheEnum";
 import { getToken } from "@/utils/auth";
 import qs from "qs";
 
 // 创建 axios 实例
 const service = axios.create({
-  baseURL: import.meta.env.VITE_APP_BASE_API,
+  baseURL: import.meta.env.VITE_BASE_API,
   timeout: import.meta.env.VITE_TIMEOUT || 50000,
   headers: { "Content-Type": "application/json;charset=utf-8" },
   paramsSerializer: (params) => {

@@ -2,15 +2,17 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-20 20:34:59
- * @LastEditTime: 2024-10-13 19:13:04
+ * @LastEditTime: 2024-10-25 22:52:34
  */
 
 import pcAPI from "@/api/pcSettingAPI";
 import { ElMessage } from "element-plus";
 import type { pcDel, pcUpdate, pcInsert } from "@/types/pc.d.ts";
+import PublicAPI from "@/api/publicAPI";
 // 实例化
 
 export async function pclist() {
+  await new Promise((resolve) => setTimeout(resolve, 1000)); // 添加1秒延迟
   try {
     const response = await pcAPI.requestPcList();
 
