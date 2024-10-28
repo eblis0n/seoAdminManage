@@ -2,12 +2,12 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-10-28 16:46:25
+ * @LastEditTime: 2024-10-28 16:46:45
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 
-import { amazonSQSList } from "./amazonsqsJS";
+import { amazonSQSList } from "./teleUpshotJS";
 
 const currentPage = ref(1); // 当前页码
 const pageSize = ref(10); // 每页显示的数据数量

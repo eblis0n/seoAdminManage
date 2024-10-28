@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-10-24 15:32:55
- * @LastEditTime: 2024-10-26 15:40:07
+ * @LastEditTime: 2024-10-28 20:26:49
  */
 export interface splicingInsert {
   zyurl: string;
@@ -22,4 +22,8 @@ export interface splicingResult {
   url: string;
   platform: string;
   genre: string;
+}
+
+export interface splicingTotal {
+  total: number;
 }

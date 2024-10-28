@@ -2,12 +2,13 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-10-26 15:53:13
+ * @LastEditTime: 2024-10-28 20:45:05
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { splicingList, addGo, publishGo } from "./splicingJS";
+import { splicingList, addGo, publishGo, clearGo, totalGo } from "./splicingJS";
 import { useSupportedPlatformsHook } from "@/store/modules/public";
+import type { splicingTotal } from "@/types/splicing.d.ts";
 
 const supportedPlatformsStore = useSupportedPlatformsHook();
 
@@ -16,6 +17,8 @@ const pageSize = ref(10); // 每页显示的数据数量
 
 const listDatas = ref<any[]>([]);
 const platforOptions = ref<any[]>([]);
+
+const totalVal = ref<number>(0);
 
 const popBoxTit = ref("");
 
@@ -46,11 +49,14 @@ const genreMap: Record<Genre, string> = {
 const initData = async () => {
   loading.value = true;
   try {
-    const [listData, _] = await Promise.all([
+    const [listData, totalData, _] = await Promise.all([
       splicingList(),
+      totalGo(),
       supportedPlatformsStore.fetchSupportedPlatforms(),
     ]);
     listDatas.value = listData;
+    totalVal.value = totalData;
+    console.log("totalVal.value", totalVal.value);
     platforOptions.value = supportedPlatformsStore.supportedPlatforms;
   } catch (error) {
     console.error("获取数据失败", error);
@@ -78,6 +84,25 @@ const Publish = () => {
   // console.log("新增", infoRef.value);
   popBoxTit.value = "发布";
   dialogFormVisible.value = true;
+};
+
+const total = async () => {
+  loading.value = true;
+  try {
+    totalVal.value = await totalGo();
+    ElMessage.success("刷新成功");
+    console.log("totalVal.value", totalVal.value);
+  } catch (error) {
+    console.error("获取总数失败", error);
+    ElMessage.error("获取总数失败");
+  } finally {
+    loading.value = false;
+  }
+};
+const Clear = async () => {
+  // console.log("新增", infoRef.value);
+  await clearGo();
+  resetInfo();
 };
 
 const save = async () => {
@@ -148,13 +173,23 @@ const handleCurrentChange = (val: number) => {
   <div class="telegra-container" v-loading="loading">
     <el-card shadow="never">
       <el-row class="row-bg" :gutter="20">
+        <el-col :span="3">
+          <div class="grid-content ep-bg-purple" />
+          <el-button type="primary" plain @click="total">
+            总数 {{ totalVal }} 条，刷新
+          </el-button>
+        </el-col>
         <el-col :span="2">
           <div class="grid-content ep-bg-purple" />
           <el-button type="primary" plain @click="Add">添加301</el-button>
         </el-col>
-        <el-col :span="4">
+        <el-col :span="2">
           <div class="grid-content ep-bg-purple" />
           <el-button type="primary" plain @click="Publish">发布</el-button>
+        </el-col>
+        <el-col :span="2">
+          <div class="grid-content ep-bg-purple" />
+          <el-button type="primary" plain @click="Clear">清空</el-button>
         </el-col>
       </el-row>
       <el-row class="row-bg">
