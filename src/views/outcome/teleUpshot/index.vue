@@ -2,26 +2,41 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-10-28 16:46:45
+ * @LastEditTime: 2024-10-28 23:56:58
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-
-import { amazonSQSList } from "./teleUpshotJS";
+import { ElMessage } from "element-plus";
+import { teleUpshotList, teleTotalGo, exportToExcel } from "./teleUpshotJS";
 
 const currentPage = ref(1); // 当前页码
 const pageSize = ref(10); // 每页显示的数据数量
-
+const totalVal = ref<number>(0);
 const listDatas = ref<any[]>([]);
 
 const loading = ref(false);
+
+// 定义一个类型来表示可能的 genre 值
+type Genre = "0" | "1" | "2";
+
+// 定义 genreMap 的类型
+const genreMap: Record<Genre, string> = {
+  "0": "重定向",
+  "1": "镜像",
+  "2": "留痕",
+};
 
 // 接口相关
 const initData = async () => {
   loading.value = true;
 
   try {
-    listDatas.value = await amazonSQSList();
+    const [listData, totalData] = await Promise.all([
+      teleUpshotList({ platform: "telegra" }),
+      teleTotalGo({ platform: "telegra" }),
+    ]);
+    listDatas.value = listData;
+    totalVal.value = totalData;
   } catch (error) {
     console.error("获取数据失败", error);
   } finally {
@@ -33,10 +48,39 @@ onMounted(() => {
   initData();
 });
 
-// // 添加
-const refresh = () => {
-  // console.log("新增", infoRef.value);
-  initData();
+const formatGenre = (row: { genre: Genre }): string => {
+  return genreMap[row.genre] || "未知";
+};
+
+const total = async () => {
+  loading.value = true;
+  try {
+    totalVal.value = await teleTotalGo({ platform: "telegra" });
+    ElMessage.success("刷新成功");
+    // console.log("totalVal.value", totalVal.value);
+  } catch (error) {
+    console.error("获取总数失败", error);
+    ElMessage.error("获取总数失败");
+  } finally {
+    loading.value = false;
+  }
+};
+// 导出
+const exporData = async () => {
+  if (listDatas.value.length === 0) {
+    ElMessage.warning("没有可导出的数据");
+    return;
+  }
+  loading.value = true;
+  try {
+    const success = await exportToExcel(listDatas.value);
+    if (success) {
+      // 导出成功后重新加载数据
+      await initData();
+    }
+  } finally {
+    loading.value = false;
+  }
 };
 
 const handleSizeChange = (val: number) => {
@@ -50,9 +94,15 @@ const handleCurrentChange = (val: number) => {
   <div class="pc-container" v-loading="loading">
     <el-card shadow="never">
       <el-row class="row-bg">
-        <el-col :span="1">
+        <el-col :span="3">
           <div class="grid-content ep-bg-purple" />
-          <el-button type="primary" plain @click="refresh">刷新</el-button>
+          <el-button type="primary" plain @click="total">
+            总数 {{ totalVal }} 条，刷新
+          </el-button>
+        </el-col>
+        <el-col :span="2">
+          <div class="grid-content ep-bg-purple" />
+          <el-button type="primary" plain @click="exporData">导出</el-button>
         </el-col>
       </el-row>
       <el-row class="row-bg">
@@ -69,8 +119,23 @@ const handleCurrentChange = (val: number) => {
               "
             >
               <el-table-column prop="id" label="ID" align="center" />
-
-              <el-table-column prop="url" label="队列url" align="center" />
+              <el-table-column prop="url" label="url" align="center" />
+              <el-table-column
+                prop="platform"
+                label="投放平台"
+                align="center"
+              />
+              <el-table-column
+                prop="genre"
+                label="类型"
+                align="center"
+                :formatter="formatGenre"
+              />
+              <el-table-column
+                prop="created_at"
+                label="添加时间"
+                align="center"
+              />
             </el-table>
           </el-scrollbar>
         </el-col>

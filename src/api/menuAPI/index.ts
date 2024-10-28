@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2023-10-17 21:21:36
- * @LastEditTime: 2024-10-24 14:18:16
+ * @LastEditTime: 2024-10-28 22:33:42
  */
 //统一管理域名相关的接口
 import request from "@/utils/axios/request";
@@ -14,7 +14,6 @@ import type {
   // MenuForm,
   // OptionType,
 } from "@/types/menu";
-
 enum API {
   MENU_ROUTES = "/sys/menu/routes/",
   MENU_LIST = "/sys/menu/list/",
