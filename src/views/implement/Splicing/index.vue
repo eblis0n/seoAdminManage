@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-10-28 21:10:08
+ * @LastEditTime: 2024-10-28 21:21:12
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -105,9 +105,17 @@ const total = async () => {
   }
 };
 const Clear = async () => {
-  // console.log("新增", infoRef.value);
-  await clearGo();
-  resetInfo();
+  loading.value = true;
+  try {
+    await clearGo();
+    ElMessage.error("清空成功");
+  } catch (error) {
+    console.error("清空失败", error);
+    ElMessage.error("清空失败");
+  } finally {
+    loading.value = false;
+    resetInfo();
+  }
 };
 
 const save = async () => {
