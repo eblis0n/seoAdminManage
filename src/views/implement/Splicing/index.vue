@@ -2,13 +2,12 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-10-28 20:45:05
+ * @LastEditTime: 2024-10-28 21:10:08
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { splicingList, addGo, publishGo, clearGo, totalGo } from "./splicingJS";
 import { useSupportedPlatformsHook } from "@/store/modules/public";
-import type { splicingTotal } from "@/types/splicing.d.ts";
 
 const supportedPlatformsStore = useSupportedPlatformsHook();
 
@@ -80,6 +79,12 @@ const Add = () => {
   dialogFormVisible.value = true;
 };
 
+const oneAdd = () => {
+  // console.log("新增", infoRef.value);
+  popBoxTit.value = "新增不拼接";
+  dialogFormVisible.value = true;
+};
+
 const Publish = () => {
   // console.log("新增", infoRef.value);
   popBoxTit.value = "发布";
@@ -122,14 +127,24 @@ const save = async () => {
       };
       await addGo(data);
     } else {
-      const data = {
-        alt_text: infoRef.value.alt_text,
-        stacking_min: infoRef.value.stacking_min,
-        stacking_max: infoRef.value.stacking_max,
-        platform: infoRef.value.platform,
-        genre: infoRef.value.genre,
-      };
-      await publishGo(data);
+      if (popBoxTit.value === "新增不拼接") {
+        const data = {
+          zyurl: "",
+          url: infoRef.value.url,
+          platform: infoRef.value.platform,
+          genre: infoRef.value.genre,
+        };
+        await addGo(data);
+      } else {
+        const data = {
+          alt_text: infoRef.value.alt_text,
+          stacking_min: infoRef.value.stacking_min,
+          stacking_max: infoRef.value.stacking_max,
+          platform: infoRef.value.platform,
+          genre: infoRef.value.genre,
+        };
+        await publishGo(data);
+      }
     }
   } catch (error) {
     console.log("出现异常:", error);
@@ -182,6 +197,10 @@ const handleCurrentChange = (val: number) => {
         <el-col :span="2">
           <div class="grid-content ep-bg-purple" />
           <el-button type="primary" plain @click="Add">添加301</el-button>
+        </el-col>
+        <el-col :span="2">
+          <div class="grid-content ep-bg-purple" />
+          <el-button type="primary" plain @click="oneAdd">不拼接添加</el-button>
         </el-col>
         <el-col :span="2">
           <div class="grid-content ep-bg-purple" />
@@ -249,7 +268,11 @@ const handleCurrentChange = (val: number) => {
         width="1400px"
       >
         <el-form :model="infoRef">
-          <el-row class="row-bg" :gutter="20" v-show="popBoxTit === '新增'">
+          <el-row
+            class="row-bg"
+            :gutter="20"
+            v-show="popBoxTit === '新增' || popBoxTit === '新增不拼接'"
+          >
             <el-col :span="8">
               <el-form-item
                 label="资源URL"
@@ -270,14 +293,14 @@ const handleCurrentChange = (val: number) => {
               <el-form-item
                 label="目标URL"
                 class="form_item"
-                v-if="popBoxTit === '新增'"
+                v-if="popBoxTit === '新增' || popBoxTit === '新增不拼接'"
               >
                 <el-input
                   v-model="infoRef.url"
                   style="width: 240px"
                   :autosize="{ minRows: 10, maxRows: 20 }"
                   type="textarea"
-                  placeholder="输入 资源URL"
+                  placeholder="输入 URL"
                   autocomplete="off"
                 />
               </el-form-item>
