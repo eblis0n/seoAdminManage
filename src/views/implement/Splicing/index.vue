@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-10-28 21:21:12
+ * @LastEditTime: 2024-10-31 16:10:25
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -28,8 +28,8 @@ const infoRef = ref<any>({
   zyurl: "",
   url: "",
   alt_text: "",
-  stacking_min: "",
-  stacking_max: "",
+  stacking_min: "250",
+  stacking_max: "300",
   platform: "",
   genre: "0",
 });
@@ -176,8 +176,8 @@ const resetInfo = async () => {
     zyurl: "",
     url: "",
     alt_text: "",
-    stacking_min: "",
-    stacking_max: "",
+    stacking_min: "250",
+    stacking_max: "300",
     platform: "",
     genre: "0",
   };

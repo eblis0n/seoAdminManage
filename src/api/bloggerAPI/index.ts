@@ -2,32 +2,39 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2023-10-17 21:21:36
- * @LastEditTime: 2024-10-09 22:06:55
+ * @LastEditTime: 2024-10-31 15:31:24
  */
 //统一管理域名相关的接口
 import request from "@/utils/axios/request";
-import bloggerRequest from "@/utils/axios/bloggerRequest";
 
 //引入接口类型
 import type {
-  bloggerPostsSelectParamsType,
-  ListResponseModel,
-} from "@/types/other.d.ts";
+  bloggerResult,
+  bloggerInsert,
+  bloggerDel,
+  bloggerUpdate,
+} from "@/types/blogger.d.ts";
 
 enum API {
-  BLOGGER_POSTS_LIST = "/blogger/posts/list/",
-  BLOGGER_POSTS_RECORDING = "/blogger/posts/recording/",
-  BLOGGER_POSTS_SELECT = "/blogger/posts/select/",
+  BLOGGER_INFO_LIST = "/blog/list/",
+  BLOGGER_INFO_INSERT = "/blog/add/",
+  BLOGGER_INFO_UPDATE = "/blog/update/",
+  BLOGGER_INFO_DELETE = "/blog/delete/",
 }
 
-// 获取列表
-export const requestBloggerPostsList = () =>
-  request.get<any, ListResponseModel>(API.BLOGGER_POSTS_LIST);
+class bloggerAPI {
+  // 获取列表
+  static requestBloggerList = () =>
+    request.get<any, bloggerResult[]>(API.BLOGGER_INFO_LIST);
 
-// 补入库
-export const requestBloggerPostsRecording = () =>
-  bloggerRequest.get<any, ListResponseModel>(API.BLOGGER_POSTS_RECORDING);
+  static requestBloggerInsert = (data: bloggerInsert) =>
+    request.post<any, bloggerResult[]>(API.BLOGGER_INFO_INSERT, data);
 
-//查询接口方法
-export const requestBloggerPostsSelect = (data: bloggerPostsSelectParamsType) =>
-  request.post<string, ListResponseModel>(API.BLOGGER_POSTS_SELECT, data);
+  static requestBloggerUpdate = (data: bloggerUpdate) =>
+    request.post<any, bloggerResult[]>(API.BLOGGER_INFO_UPDATE, data);
+
+  static requestBloggerDel = (data: bloggerDel) =>
+    request.post<any, bloggerResult[]>(API.BLOGGER_INFO_DELETE, data);
+}
+
+export default bloggerAPI;
