@@ -2,12 +2,12 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-10-28 16:46:25
+ * @LastEditTime: 2024-11-01 21:37:54
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-
-import { amazonSQSList } from "./amazonsqsJS";
+import type { amazonsqsDel } from "@/types/other";
+import { amazonSQSList, delGo } from "./amazonsqsJS";
 
 const currentPage = ref(1); // 当前页码
 const pageSize = ref(10); // 每页显示的数据数量
@@ -33,7 +33,23 @@ onMounted(() => {
   initData();
 });
 
-// // 添加
+// // 删除
+const delet = async (row: amazonsqsDel) => {
+  loading.value = true;
+  try {
+    const data = {
+      url: row.url,
+    };
+    await delGo(data);
+  } catch (error) {
+    console.log("出现异常:", error);
+  } finally {
+    loading.value = false;
+    initData();
+  }
+};
+
+// 刷新
 const refresh = () => {
   // console.log("新增", infoRef.value);
   initData();
@@ -71,6 +87,13 @@ const handleCurrentChange = (val: number) => {
               <el-table-column prop="id" label="ID" align="center" />
 
               <el-table-column prop="url" label="队列url" align="center" />
+              <el-table-column prop="operate" label="操作" align="center">
+                <template #default="{ row }">
+                  <el-button type="primary" link @click="delet(row)">
+                    删除
+                  </el-button>
+                </template>
+              </el-table-column>
             </el-table>
           </el-scrollbar>
         </el-col>

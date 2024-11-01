@@ -2,19 +2,18 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-20 20:34:59
- * @LastEditTime: 2024-10-29 00:25:38
+ * @LastEditTime: 2024-11-01 22:19:51
  */
 
 import { ElMessage } from "element-plus";
 import * as XLSX from "xlsx";
 
 import outcomeAPI from "@/api/outcomeAPI";
-import type { outcomeParams } from "@/types/outcome";
-// import type { outcomeDel, outcomeParams } from "@/types/outcome";
+import type { outcomeParams, outcomeExportParams } from "@/types/outcome";
 
 // 实例化
 
-export async function teleUpshotList(params: outcomeParams) {
+export async function upshotList(params: outcomeParams) {
   await new Promise((resolve) => setTimeout(resolve, 1000)); // 添加1秒延迟
 
   try {
@@ -28,7 +27,7 @@ export async function teleUpshotList(params: outcomeParams) {
   }
 }
 
-export async function teleTotalGo(params: outcomeParams) {
+export async function totalGo(params: outcomeParams) {
   await new Promise((resolve) => setTimeout(resolve, 1000)); // 添加1秒延迟
 
   try {
@@ -43,20 +42,20 @@ export async function teleTotalGo(params: outcomeParams) {
 }
 
 // 导出Excel功能
-export async function exportToExcel(data: any[]) {
-  if (data.length === 0) {
+export async function exportToExcel(data: outcomeExportParams) {
+  if (data.exportD.length === 0) {
     ElMessage.warning("没有可导出的数据");
     return false;
   }
 
-  if (data.length > 10000) {
+  if (data.exportD.length > 10000) {
     ElMessage.warning("导出数据不能超过10000条，将只导出前10000条数据");
-    data = data.slice(0, 10000);
+    data.exportD = data.exportD.slice(0, 10000);
   }
 
   try {
     // 格式化数据
-    const exportData = data.map((item) => ({
+    const exportData = data.exportD.map((item) => ({
       ID: item.id,
       URL: item.url,
       投放平台: item.platform,
@@ -76,19 +75,19 @@ export async function exportToExcel(data: any[]) {
     const ws = XLSX.utils.json_to_sheet(exportData);
 
     // 添加工作表到工作簿
-    XLSX.utils.book_append_sheet(wb, ws, "telegra发布结果");
+    XLSX.utils.book_append_sheet(wb, ws, `${data.title}发布结果`);
 
     // 生成文件名
-    const fileName = `telegra发布结果_${new Date().toLocaleDateString().replace(/\//g, "-")}.xlsx`;
+    const fileName = `${data.title}发布结果_${new Date().toLocaleDateString().replace(/\//g, "-")}.xlsx`;
 
     // 导出文件
     XLSX.writeFile(wb, fileName);
 
     // 收集所有URL
-    const urldatas = data.map((item) => item.url).join(",");
+    const urldatas = data.exportD.map((item) => item.url).join(",");
 
     const datas = {
-      platform: "telegra", // 固定使用telegra
+      platform: `${data.title}`,
       urldatas: urldatas,
     };
 

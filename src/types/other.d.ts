@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2023-10-17 21:22:47
- * @LastEditTime: 2024-10-27 21:49:52
+ * @LastEditTime: 2024-11-01 20:56:10
  */
 
 export interface uploadFileParamsType {
@@ -17,5 +17,9 @@ export interface platformsParams {
 
 export interface amazonsqsResult {
   id: number;
+  url: string;
+}
+
+export interface amazonsqsDel {
   url: string;
 }

@@ -2,12 +2,12 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-10-28 23:56:58
+ * @LastEditTime: 2024-11-01 22:32:14
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { ElMessage } from "element-plus";
-import { teleUpshotList, teleTotalGo, exportToExcel } from "./teleUpshotJS";
+import { upshotList, totalGo, exportToExcel } from "../upshotJS";
 
 const currentPage = ref(1); // 当前页码
 const pageSize = ref(10); // 每页显示的数据数量
@@ -32,8 +32,8 @@ const initData = async () => {
 
   try {
     const [listData, totalData] = await Promise.all([
-      teleUpshotList({ platform: "telegra" }),
-      teleTotalGo({ platform: "telegra" }),
+      upshotList({ platform: "telegra" }),
+      totalGo({ platform: "telegra" }),
     ]);
     listDatas.value = listData;
     totalVal.value = totalData;
@@ -55,7 +55,7 @@ const formatGenre = (row: { genre: Genre }): string => {
 const total = async () => {
   loading.value = true;
   try {
-    totalVal.value = await teleTotalGo({ platform: "telegra" });
+    totalVal.value = await totalGo({ platform: "telegra" });
     ElMessage.success("刷新成功");
     // console.log("totalVal.value", totalVal.value);
   } catch (error) {
@@ -73,7 +73,11 @@ const exporData = async () => {
   }
   loading.value = true;
   try {
-    const success = await exportToExcel(listDatas.value);
+    const data = {
+      title: "telegra",
+      exportD: listDatas.value,
+    };
+    const success = await exportToExcel(data);
     if (success) {
       // 导出成功后重新加载数据
       await initData();
@@ -91,7 +95,7 @@ const handleCurrentChange = (val: number) => {
 };
 </script>
 <template>
-  <div class="pc-container" v-loading="loading">
+  <div class="telegra-container" v-loading="loading">
     <el-card shadow="never">
       <el-row class="row-bg">
         <el-col :span="3">
@@ -157,7 +161,7 @@ const handleCurrentChange = (val: number) => {
 </template>
 
 <style lang="scss" scoped>
-.pc-container {
+.telegra-container {
   position: relative;
   padding: 24px;
 }
