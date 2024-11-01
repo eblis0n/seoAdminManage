@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-10-31 16:10:25
+ * @LastEditTime: 2024-11-01 16:07:38
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -32,6 +32,7 @@ const infoRef = ref<any>({
   stacking_max: "300",
   platform: "",
   genre: "0",
+  group: "all",
 });
 
 // 定义一个类型来表示可能的 genre 值
@@ -150,6 +151,7 @@ const save = async () => {
           stacking_max: infoRef.value.stacking_max,
           platform: infoRef.value.platform,
           genre: infoRef.value.genre,
+          group: infoRef.value.group,
         };
         await publishGo(data);
       }
@@ -180,6 +182,7 @@ const resetInfo = async () => {
     stacking_max: "300",
     platform: "",
     genre: "0",
+    group: "all",
   };
 
   await initData();
@@ -326,6 +329,17 @@ const handleCurrentChange = (val: number) => {
             </el-col>
             <el-col :span="6">
               <el-form-item
+                label="分组"
+                class="form_item"
+                v-if="popBoxTit === '发布'"
+              >
+                <el-input v-model="infoRef.group" autocomplete="off" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row class="row-bg" :gutter="20" v-show="popBoxTit === '发布'">
+            <el-col :span="6">
+              <el-form-item
                 label="最少堆叠"
                 class="form_item"
                 v-if="popBoxTit === '发布'"
@@ -344,7 +358,7 @@ const handleCurrentChange = (val: number) => {
             </el-col>
           </el-row>
           <el-row class="row-bg" :gutter="20">
-            <el-col :span="10">
+            <el-col :span="6">
               <el-form-item
                 class="form_item flex items-center"
                 label="投放平台"
@@ -366,7 +380,7 @@ const handleCurrentChange = (val: number) => {
                 </div>
               </el-form-item>
             </el-col>
-            <el-col :span="11">
+            <el-col :span="6">
               <el-form-item class="form_item flex items-center" label="类型">
                 <div class="flex items-center">
                   <el-radio-group
