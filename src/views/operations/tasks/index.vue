@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-04 20:14:36
+ * @LastEditTime: 2024-11-01 16:07:38
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -32,8 +32,6 @@ const infoRef = ref<any>({
   stacking_max: "300",
   platform: "",
   genre: "0",
-  sort: "0",
-  postingStyle: "0",
   group: "all",
 });
 
@@ -45,14 +43,6 @@ const genreMap: Record<Genre, string> = {
   "0": "重定向",
   "1": "镜像",
   "2": "留痕",
-};
-
-type sort = "0" | "1";
-
-// 定义 genreMap 的类型
-const sortMap: Record<sort, string> = {
-  "0": "拼接",
-  "1": "不拼接",
 };
 
 // 接口相关
@@ -84,13 +74,15 @@ const formatGenre = (row: { genre: Genre }): string => {
   return genreMap[row.genre] || "未知";
 };
 
-const formatSort = (row: { sort: sort }): string => {
-  return sortMap[row.sort] || "未知";
-};
-
 const Add = () => {
   // console.log("新增", infoRef.value);
   popBoxTit.value = "新增";
+  dialogFormVisible.value = true;
+};
+
+const oneAdd = () => {
+  // console.log("新增", infoRef.value);
+  popBoxTit.value = "新增不拼接";
   dialogFormVisible.value = true;
 };
 
@@ -110,7 +102,6 @@ const total = async () => {
     console.error("获取总数失败", error);
     ElMessage.error("获取总数失败");
   } finally {
-    resetInfo();
     loading.value = false;
   }
 };
@@ -123,8 +114,8 @@ const Clear = async () => {
     console.error("清空失败", error);
     ElMessage.error("清空失败");
   } finally {
-    resetInfo();
     loading.value = false;
+    resetInfo();
   }
 };
 
@@ -142,21 +133,28 @@ const save = async () => {
         url: infoRef.value.url,
         platform: infoRef.value.platform,
         genre: infoRef.value.genre,
-        sort: infoRef.value.sort,
       };
       await addGo(data);
     } else {
-      const data = {
-        alt_text: infoRef.value.alt_text,
-        stacking_min: infoRef.value.stacking_min,
-        stacking_max: infoRef.value.stacking_max,
-        platform: infoRef.value.platform,
-        genre: infoRef.value.genre,
-        group: infoRef.value.group,
-        sort: infoRef.value.sort,
-        postingStyle: infoRef.value.postingStyle,
-      };
-      await publishGo(data);
+      if (popBoxTit.value === "新增不拼接") {
+        const data = {
+          zyurl: "",
+          url: infoRef.value.url,
+          platform: infoRef.value.platform,
+          genre: infoRef.value.genre,
+        };
+        await addGo(data);
+      } else {
+        const data = {
+          alt_text: infoRef.value.alt_text,
+          stacking_min: infoRef.value.stacking_min,
+          stacking_max: infoRef.value.stacking_max,
+          platform: infoRef.value.platform,
+          genre: infoRef.value.genre,
+          group: infoRef.value.group,
+        };
+        await publishGo(data);
+      }
     }
   } catch (error) {
     console.log("出现异常:", error);
@@ -184,15 +182,10 @@ const resetInfo = async () => {
     stacking_max: "300",
     platform: "",
     genre: "0",
-    sort: "0",
-    postingStyle: "0",
     group: "all",
   };
 
   await initData();
-};
-const handleClose = () => {
-  resetInfo();
 };
 
 const handleSizeChange = (val: number) => {
@@ -214,7 +207,11 @@ const handleCurrentChange = (val: number) => {
         </el-col>
         <el-col :span="2">
           <div class="grid-content ep-bg-purple" />
-          <el-button type="primary" plain @click="Add">添加</el-button>
+          <el-button type="primary" plain @click="Add">添加301</el-button>
+        </el-col>
+        <el-col :span="2">
+          <div class="grid-content ep-bg-purple" />
+          <el-button type="primary" plain @click="oneAdd">不拼接添加</el-button>
         </el-col>
         <el-col :span="2">
           <div class="grid-content ep-bg-purple" />
@@ -244,12 +241,6 @@ const handleCurrentChange = (val: number) => {
                 prop="platform"
                 label="投放平台"
                 align="center"
-              />
-              <el-table-column
-                prop="sort"
-                label="分类"
-                align="center"
-                :formatter="formatSort"
               />
               <el-table-column
                 prop="genre"
@@ -286,64 +277,18 @@ const handleCurrentChange = (val: number) => {
         center
         :title="popBoxTit"
         width="1400px"
-        @close="handleClose"
       >
         <el-form :model="infoRef">
-          <el-row class="row-bg" :gutter="20">
-            <el-col :span="6">
-              <el-form-item class="form_item flex items-center" label="分类">
-                <div class="flex items-center">
-                  <el-radio-group
-                    v-model="infoRef.sort"
-                    class="flex items-center"
-                  >
-                    <el-radio label="0" size="large">拼接</el-radio>
-                    <el-radio label="1" size="large">不拼接</el-radio>
-                  </el-radio-group>
-                </div>
-              </el-form-item>
-            </el-col>
-            <el-col :span="14">
-              <el-form-item
-                class="form_item flex items-center"
-                label="文章展示"
-                v-if="popBoxTit === '发布'"
-              >
-                <div class="flex items-center">
-                  <el-radio-group
-                    v-model="infoRef.postingStyle"
-                    class="flex items-center"
-                  >
-                    <el-radio label="0" size="large">A标签文案</el-radio>
-                    <el-radio label="1" size="large">A链接</el-radio>
-                    <el-radio label="2" size="large">末尾链接</el-radio>
-                  </el-radio-group>
-                </div>
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row class="row-bg" :gutter="20" v-show="popBoxTit === '新增'">
-            <el-col :span="8">
-              <el-form-item
-                label="目标URL"
-                class="form_item"
-                v-if="popBoxTit === '新增'"
-              >
-                <el-input
-                  v-model="infoRef.url"
-                  style="width: 240px"
-                  :autosize="{ minRows: 10, maxRows: 20 }"
-                  type="textarea"
-                  placeholder="输入 URL"
-                  autocomplete="off"
-                />
-              </el-form-item>
-            </el-col>
+          <el-row
+            class="row-bg"
+            :gutter="20"
+            v-show="popBoxTit === '新增' || popBoxTit === '新增不拼接'"
+          >
             <el-col :span="8">
               <el-form-item
                 label="资源URL"
                 class="form_item"
-                v-if="popBoxTit === '新增' && infoRef.sort === '0'"
+                v-if="popBoxTit === '新增'"
               >
                 <el-input
                   v-model="infoRef.zyurl"
@@ -351,6 +296,22 @@ const handleCurrentChange = (val: number) => {
                   :autosize="{ minRows: 10, maxRows: 20 }"
                   type="textarea"
                   placeholder="输入 资源URL"
+                  autocomplete="off"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item
+                label="目标URL"
+                class="form_item"
+                v-if="popBoxTit === '新增' || popBoxTit === '新增不拼接'"
+              >
+                <el-input
+                  v-model="infoRef.url"
+                  style="width: 240px"
+                  :autosize="{ minRows: 10, maxRows: 20 }"
+                  type="textarea"
+                  placeholder="输入 URL"
                   autocomplete="off"
                 />
               </el-form-item>
@@ -479,6 +440,10 @@ const handleCurrentChange = (val: number) => {
 }
 
 .m-2 {
+  width: 300px;
+}
+
+.form_item {
   width: 300px;
 }
 </style>

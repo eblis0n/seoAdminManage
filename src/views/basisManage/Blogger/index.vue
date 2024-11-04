@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-01 22:19:14
+ * @LastEditTime: 2024-11-03 13:48:48
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -112,10 +112,13 @@ const save = async () => {
 };
 
 // // 删除
-const delet = async (id: bloggerDel) => {
+const delet = async (row: bloggerDel) => {
   loading.value = true;
   try {
-    await delGo(id);
+    const data = {
+      id: row.id,
+    };
+    await delGo(data);
   } catch (error) {
     console.log("出现异常:", error);
   } finally {
@@ -194,7 +197,7 @@ const handleCurrentChange = (val: number) => {
                   <el-button type="primary" link @click="revise(row)">
                     修改
                   </el-button>
-                  <el-button type="primary" link @click="delet(row.id)">
+                  <el-button type="primary" link @click="delet(row)">
                     删除
                   </el-button>
                 </template>
