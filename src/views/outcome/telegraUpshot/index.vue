@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-01 22:32:14
+ * @LastEditTime: 2024-11-05 03:28:51
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -62,6 +62,7 @@ const total = async () => {
     console.error("获取总数失败", error);
     ElMessage.error("获取总数失败");
   } finally {
+    initData();
     loading.value = false;
   }
 };

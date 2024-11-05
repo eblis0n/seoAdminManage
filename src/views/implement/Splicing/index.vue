@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-04 20:14:36
+ * @LastEditTime: 2024-11-05 14:48:29
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -34,6 +34,7 @@ const infoRef = ref<any>({
   genre: "0",
   sort: "0",
   postingStyle: "0",
+  isarts: "1",
   group: "all",
 });
 
@@ -155,6 +156,7 @@ const save = async () => {
         group: infoRef.value.group,
         sort: infoRef.value.sort,
         postingStyle: infoRef.value.postingStyle,
+        isarts: infoRef.value.isarts,
       };
       await publishGo(data);
     }
@@ -186,6 +188,7 @@ const resetInfo = async () => {
     genre: "0",
     sort: "0",
     postingStyle: "0",
+    isarts: "1",
     group: "all",
   };
 
@@ -299,6 +302,23 @@ const handleCurrentChange = (val: number) => {
                   >
                     <el-radio label="0" size="large">拼接</el-radio>
                     <el-radio label="1" size="large">不拼接</el-radio>
+                  </el-radio-group>
+                </div>
+              </el-form-item>
+            </el-col>
+            <el-col :span="14">
+              <el-form-item
+                class="form_item flex items-center"
+                label="是否贴文"
+                v-if="popBoxTit === '发布'"
+              >
+                <div class="flex items-center">
+                  <el-radio-group
+                    v-model="infoRef.isarts"
+                    class="flex items-center"
+                  >
+                    <el-radio label="0" size="large">贴文</el-radio>
+                    <el-radio label="1" size="large">不帖文</el-radio>
                   </el-radio-group>
                 </div>
               </el-form-item>
