@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-05 14:48:29
+ * @LastEditTime: 2024-11-06 16:22:59
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -28,6 +28,7 @@ const infoRef = ref<any>({
   zyurl: "",
   url: "",
   alt_text: "",
+  title_alt: "",
   stacking_min: "250",
   stacking_max: "300",
   platform: "",
@@ -148,6 +149,7 @@ const save = async () => {
       await addGo(data);
     } else {
       const data = {
+        title_alt: infoRef.value.title_alt,
         alt_text: infoRef.value.alt_text,
         stacking_min: infoRef.value.stacking_min,
         stacking_max: infoRef.value.stacking_max,
@@ -182,6 +184,7 @@ const resetInfo = async () => {
     zyurl: "",
     url: "",
     alt_text: "",
+    title_alt: "",
     stacking_min: "250",
     stacking_max: "300",
     platform: "",
@@ -294,6 +297,44 @@ const handleCurrentChange = (val: number) => {
         <el-form :model="infoRef">
           <el-row class="row-bg" :gutter="20">
             <el-col :span="6">
+              <el-form-item
+                class="form_item flex items-center"
+                label="投放平台"
+              >
+                <div class="flex items-center">
+                  <el-select
+                    v-model="infoRef.platform"
+                    placeholder="投放平台"
+                    size="large"
+                    style="width: 240px"
+                  >
+                    <el-option
+                      v-for="item in platforOptions"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    />
+                  </el-select>
+                </div>
+              </el-form-item>
+            </el-col>
+            <el-col :span="6">
+              <el-form-item class="form_item flex items-center" label="类型">
+                <div class="flex items-center">
+                  <el-radio-group
+                    v-model="infoRef.genre"
+                    class="flex items-center"
+                  >
+                    <el-radio label="0" size="large">重定向</el-radio>
+                    <el-radio label="1" size="large">镜像</el-radio>
+                    <el-radio label="2" size="large">留痕</el-radio>
+                  </el-radio-group>
+                </div>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row class="row-bg" :gutter="20">
+            <el-col :span="4">
               <el-form-item class="form_item flex items-center" label="分类">
                 <div class="flex items-center">
                   <el-radio-group
@@ -306,7 +347,7 @@ const handleCurrentChange = (val: number) => {
                 </div>
               </el-form-item>
             </el-col>
-            <el-col :span="14">
+            <el-col :span="6">
               <el-form-item
                 class="form_item flex items-center"
                 label="是否贴文"
@@ -323,7 +364,7 @@ const handleCurrentChange = (val: number) => {
                 </div>
               </el-form-item>
             </el-col>
-            <el-col :span="14">
+            <el-col :span="10">
               <el-form-item
                 class="form_item flex items-center"
                 label="文章展示"
@@ -379,20 +420,20 @@ const handleCurrentChange = (val: number) => {
           <el-row class="row-bg" :gutter="20" v-show="popBoxTit === '发布'">
             <el-col :span="6">
               <el-form-item
-                label="A标签展示文案"
+                label="标题"
                 class="form_item"
                 v-if="popBoxTit === '发布'"
               >
-                <el-input v-model="infoRef.alt_text" autocomplete="off" />
+                <el-input v-model="infoRef.title_alt" autocomplete="off" />
               </el-form-item>
             </el-col>
             <el-col :span="6">
               <el-form-item
-                label="分组"
+                label="A标签展示文案"
                 class="form_item"
-                v-if="popBoxTit === '发布'"
+                v-if="popBoxTit === '发布' && infoRef.postingStyle === '0'"
               >
-                <el-input v-model="infoRef.group" autocomplete="off" />
+                <el-input v-model="infoRef.alt_text" autocomplete="off" />
               </el-form-item>
             </el-col>
           </el-row>
@@ -415,42 +456,13 @@ const handleCurrentChange = (val: number) => {
                 <el-input v-model="infoRef.stacking_max" autocomplete="off" />
               </el-form-item>
             </el-col>
-          </el-row>
-          <el-row class="row-bg" :gutter="20">
             <el-col :span="6">
               <el-form-item
-                class="form_item flex items-center"
-                label="投放平台"
+                label="分组"
+                class="form_item"
+                v-if="popBoxTit === '发布' && infoRef.platform === 'blogger'"
               >
-                <div class="flex items-center">
-                  <el-select
-                    v-model="infoRef.platform"
-                    placeholder="投放平台"
-                    size="large"
-                    style="width: 240px"
-                  >
-                    <el-option
-                      v-for="item in platforOptions"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    />
-                  </el-select>
-                </div>
-              </el-form-item>
-            </el-col>
-            <el-col :span="6">
-              <el-form-item class="form_item flex items-center" label="类型">
-                <div class="flex items-center">
-                  <el-radio-group
-                    v-model="infoRef.genre"
-                    class="flex items-center"
-                  >
-                    <el-radio label="0" size="large">重定向</el-radio>
-                    <el-radio label="1" size="large">镜像</el-radio>
-                    <el-radio label="2" size="large">留痕</el-radio>
-                  </el-radio-group>
-                </div>
+                <el-input v-model="infoRef.group" autocomplete="off" />
               </el-form-item>
             </el-col>
           </el-row>
@@ -496,9 +508,5 @@ const handleCurrentChange = (val: number) => {
 .dialog-footer {
   display: flex;
   justify-content: flex-start;
-}
-
-.m-2 {
-  width: 300px;
 }
 </style>

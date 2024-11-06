@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-10-24 15:32:55
- * @LastEditTime: 2024-11-05 14:49:52
+ * @LastEditTime: 2024-11-06 16:09:46
  */
 export interface splicingInsert {
   zyurl: string;
@@ -14,6 +14,7 @@ export interface splicingInsert {
 
 export interface splicingPublish {
   alt_text: string;
+  title_alt: string;
   stacking_min: number;
   stacking_max: number;
   platform: string;

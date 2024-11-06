@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-04 00:51:19
+ * @LastEditTime: 2024-11-05 16:54:00
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -23,16 +23,21 @@ const infoRef = ref<any>({
   id: "",
   host_ip: "",
   host_group: "",
-  status: "0",
+  is_disabled: "0",
   remark: "",
   ping_time: "",
+  online: "",
 });
 
-// 定义一个类型来表示可能的 genre 值
-type status = "0" | "1";
+type online = "0" | "1";
+const onlineMap: Record<online, string> = {
+  "0": "在线",
+  "1": "离线",
+};
 
-// 定义 genreMap 的类型
-const statusMap: Record<status, string> = {
+type is_disabled = "0" | "1";
+
+const disabledMap: Record<is_disabled, string> = {
   "0": "上架",
   "1": "下架",
 };
@@ -55,16 +60,12 @@ onMounted(() => {
   initData();
 });
 
-const formatStatus = (row: { status: status }): string => {
-  return statusMap[row.status] || "未知";
+const formatOnline = (row: { online: online }): string => {
+  return onlineMap[row.online] || "未知";
 };
 
-const formatOnline = (row: { ping_time: string }): string => {
-  const pingTime = new Date(row.ping_time).getTime();
-  const currentTime = Date.now();
-  const fiveMinutesInMillis = 5 * 60 * 1000; // 5分钟的毫秒数
-
-  return currentTime - pingTime < fiveMinutesInMillis ? "在线" : "离线";
+const formatdisabledMap = (row: { is_disabled: is_disabled }): string => {
+  return disabledMap[row.is_disabled] || "未知";
 };
 
 // 修改
@@ -189,10 +190,10 @@ const handleCurrentChange = (val: number) => {
               />
 
               <el-table-column
-                prop="status"
+                prop="is_disabled"
                 label="状态"
                 align="center"
-                :formatter="formatStatus"
+                :formatter="formatdisabledMap"
               />
             </el-table>
           </el-scrollbar>
