@@ -1,3 +1,9 @@
+/*
+ * @version: 1.0.0
+ * @Author: Eblis
+ * @Date: 2024-10-11 23:58:30
+ * @LastEditTime: 2024-11-07 22:41:37
+ */
 import type { App } from "vue";
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 

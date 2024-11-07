@@ -123,6 +123,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
     // 预加载项目必需的组件
     optimizeDeps: {
       include: [
+        "jsoneditor",
         "vue",
         "vue-router",
         "pinia",

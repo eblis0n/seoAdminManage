@@ -2,12 +2,21 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-07 22:18:26
+ * @LastEditTime: 2024-11-07 23:39:17
 -->
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, shallowRef, nextTick } from "vue";
 import { hostsList, updateGo, disableGo } from "../operationsJS";
-import type { hostDisable, hostsUpdate, hostsResult } from "@/types/operations";
+import type {
+  hostDisable,
+  postTaskParams,
+  hostsResult,
+} from "@/types/operations";
+
+import JSONEditor from "jsoneditor";
+import "jsoneditor/dist/jsoneditor.css";
+
+import type { JSONEditorMode } from "jsoneditor";
 
 const currentPage = ref(1); // 当前页码
 const pageSize = ref(10); // 每页显示的数据数量
@@ -24,6 +33,10 @@ const dialogFormVisible = ref(false);
 const dialogShellVisible = ref(false);
 const dialogWSVisible = ref(false);
 
+// 添加定时器引用
+const timer = ref<ReturnType<typeof setInterval> | null>(null);
+const isAutoRefreshEnabled = ref(true); // 添加自动刷新开关状态
+
 const infoRef = ref<any>({
   id: "",
   host_ip: "",
@@ -33,6 +46,25 @@ const infoRef = ref<any>({
   ping_time: "",
   online: "",
 });
+
+const shellRef = ref<any>({
+  id: "",
+  host_ip: "",
+  task_type: "software",
+  script_name: "",
+  script_content: {},
+});
+
+const taskTypeOptions = [
+  {
+    value: "software",
+    label: "软件",
+  },
+  {
+    value: "other",
+    label: "其他",
+  },
+];
 
 type online = "0" | "1";
 const onlineMap: Record<online, string> = {
@@ -47,11 +79,52 @@ const disabledMap: Record<is_disabled, string> = {
   "1": "下架",
 };
 
-// 添加定时器引用
-const timer = ref<ReturnType<typeof setInterval> | null>(null);
+// 添加 JSONEditor 相关的 ref
+const jsonEditorContainer = ref<HTMLElement | null>(null);
+let jsonEditorInstance: JSONEditor | null = null;
 
-const lastUpdateTime = ref(""); // 添加最后更新时间
-const isAutoRefreshEnabled = ref(true); // 添加自动刷新开关状态
+// 添加 JSONEditor 配置选项
+const jsonEditorOptions = {
+  mode: "tree" as JSONEditorMode,
+  modes: ["tree", "view", "form", "code", "text"] as JSONEditorMode[],
+  onModeChange: function (newMode: JSONEditorMode, oldMode: JSONEditorMode) {
+    console.log("Mode switched from", oldMode, "to", newMode);
+  },
+  onChangeText: function (jsonString: string) {
+    try {
+      shellRef.value.script_content = JSON.parse(jsonString);
+    } catch (err) {
+      console.error("JSON parse error:", err);
+    }
+  },
+};
+
+// 初始化 JSONEditor
+const initJsonEditor = () => {
+  if (jsonEditorContainer.value) {
+    try {
+      if (jsonEditorInstance) {
+        jsonEditorInstance.destroy();
+      }
+      jsonEditorInstance = new JSONEditor(
+        jsonEditorContainer.value,
+        jsonEditorOptions,
+        shellRef.value.script_content || {}
+      );
+    } catch (error) {
+      console.error("JSONEditor initialization error:", error);
+      ElMessage.error("初始化编辑器失败");
+    }
+  }
+};
+
+// 在组件卸载时销毁编辑器
+onUnmounted(() => {
+  if (jsonEditorInstance) {
+    jsonEditorInstance.destroy();
+    jsonEditorInstance = null;
+  }
+});
 
 // 接口相关
 const initData = async () => {
@@ -69,6 +142,11 @@ const initData = async () => {
 
 onMounted(() => {
   initData();
+});
+
+// 在组件卸载时确保关闭 WebSocket
+onUnmounted(() => {
+  closeWebSocket();
 });
 
 const formatOnline = (row: { online: online }): string => {
@@ -94,9 +172,6 @@ const disable = async (row: hostDisable) => {
     loading.value = false;
   }
 };
-
-// // WebSocket 相关配置
-// const hostIp = "{{ host_ip }}"; // 从后端传递的主机 IP
 
 // 初始化 WebSocket
 const initWebSocket = (hostIp: string) => {
@@ -148,16 +223,34 @@ const closeWebSocket = () => {
   }
 };
 
-// 修改 handleClose 函数
-const handleClose = () => {
-  closeWebSocket();
+const handleCloseForm = () => {
   resetInfo();
 };
 
-// 在组件卸载时确保关闭 WebSocket
-onUnmounted(() => {
+const handleCloseWS = () => {
+  // 关闭 WebSocket 连接
   closeWebSocket();
-});
+  dialogWSVisible.value = false;
+};
+
+const handleCloseShell = () => {
+  // 销毁 JSONEditor 实例
+  if (jsonEditorInstance) {
+    jsonEditorInstance.destroy();
+    jsonEditorInstance = null;
+  }
+
+  // 重置表单数据
+  shellRef.value = {
+    host_ip: "",
+    task_type: "software",
+    script_name: "",
+    script_content: {},
+  };
+
+  // 关闭弹窗
+  dialogShellVisible.value = false;
+};
 
 // 修改
 const revise = (row: hostsResult) => {
@@ -202,13 +295,6 @@ const save = async () => {
     resetInfo();
   }
 };
-//
-
-// 自动刷新
-// // 更新最后刷新时间
-// const updateLastUpdateTime = () => {
-//   lastUpdateTime.value = new Date().toLocaleTimeString();
-// };
 
 // 添加自动刷新控制函数
 const startAutoRefresh = () => {
@@ -241,6 +327,47 @@ const toggleAutoRefresh = () => {
 const refresh = () => {
   loading.value = true;
   initData();
+};
+
+const shellScript = async (row: postTaskParams) => {
+  shellRef.value = {
+    host_ip: row.host_ip,
+    task_type: "software",
+    script_name: "",
+    script_content: {},
+  };
+
+  popBoxTit.value = "执行脚本";
+  dialogShellVisible.value = true;
+
+  // 等待 DOM 更新后初始化编辑器
+  await nextTick();
+  initJsonEditor();
+};
+
+// 添加保存脚本的函数
+const saveScript = async () => {
+  console.log("准提交数据：", infoRef.value);
+  console.log("当前提交行为:", popBoxTit.value);
+  dialogShellVisible.value = false;
+  loading.value = true;
+  if (!jsonEditorInstance) return;
+
+  try {
+    const content = jsonEditorInstance.get();
+    const data = {
+      host_ip: shellRef.value.host_ip,
+      task_type: shellRef.value.task_type,
+      script_name: shellRef.value.script_name,
+      script_content: content,
+    };
+    await updateGo(data);
+
+    // 这里添加发送到后端的逻辑
+    console.log("准备保存的脚本内容:", content);
+  } catch (error) {
+    console.error("保存脚本失败:", error);
+  }
 };
 
 // 还原弹框输入
@@ -378,8 +505,8 @@ const handleCurrentChange = (val: number) => {
         destroy-on-close
         center
         :title="popBoxTit"
-        width="1400px"
-        @close="handleClose"
+        width="80%"
+        @close="handleCloseForm"
       >
         <el-form :model="infoRef">
           <el-row class="row-bg flex items-center" :gutter="20">
@@ -433,14 +560,15 @@ const handleCurrentChange = (val: number) => {
         </template>
       </el-dialog>
       <!-- 弹框end -->
+
       <!-- 查看-->
       <el-dialog
         v-model="dialogWSVisible"
         destroy-on-close
         center
         :title="popBoxTit"
-        width="1400px"
-        @close="handleClose"
+        width="80%"
+        @close="handleCloseWS"
       >
         <div class="ws-content">
           <pre v-if="wsData" class="json-content">{{
@@ -450,6 +578,75 @@ const handleCurrentChange = (val: number) => {
         </div>
       </el-dialog>
       <!-- 查看end -->
+
+      <!-- shell脚本 -->
+      <el-dialog
+        v-model="dialogShellVisible"
+        destroy-on-close
+        center
+        :title="popBoxTit"
+        width="80%"
+        @close="handleCloseShell"
+      >
+        <div class="shell-content-container">
+          <!-- 左侧表单 -->
+          <div class="left-form">
+            <el-form :model="shellRef" label-position="top">
+              <el-form-item label="IP地址" class="form_item">
+                <span>{{ shellRef.host_ip }}</span>
+              </el-form-item>
+              <el-form-item label="脚本名称" class="form_item">
+                <el-input v-model="shellRef.script_name" autocomplete="off" />
+              </el-form-item>
+
+              <el-form-item class="form_item" label="脚本类型">
+                <el-select
+                  v-model="shellRef.task_type"
+                  placeholder="脚本类型"
+                  size="large"
+                  style="width: 100%"
+                >
+                  <el-option
+                    v-for="item in taskTypeOptions"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
+                </el-select>
+              </el-form-item>
+
+              <el-form-item class="form_item" label="脚本模板">
+                <el-select
+                  placeholder="脚本模板"
+                  size="large"
+                  style="width: 100%"
+                >
+                  <el-option
+                    v-for="item in taskTypeOptions"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
+                </el-select>
+              </el-form-item>
+            </el-form>
+          </div>
+
+          <!-- 右侧编辑器 -->
+          <div class="right-editor">
+            <div class="editor-label">脚本内容</div>
+            <div ref="jsonEditorContainer" class="json-editor-container"></div>
+          </div>
+        </div>
+
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="handleCloseShell">取消</el-button>
+            <el-button type="primary" @click="saveScript">保存</el-button>
+          </span>
+        </template>
+      </el-dialog>
+      <!-- shell脚本 end-->
     </el-card>
   </div>
 </template>
@@ -516,6 +713,90 @@ const handleCurrentChange = (val: number) => {
     justify-content: center;
     height: 200px;
     color: #909399;
+  }
+}
+
+.json-editor-container {
+  width: 100%;
+  height: 600px;
+  margin: 20px 0;
+  overflow: hidden;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+}
+
+:deep(.jsoneditor) {
+  width: 100%;
+  height: 100%;
+  border: none;
+
+  .jsoneditor-menu {
+    background-color: #409eff;
+    border-bottom: 1px solid #dcdfe6;
+  }
+
+  .jsoneditor-outer {
+    height: calc(100% - 40px);
+    padding: 10px;
+  }
+
+  .ace-jsoneditor {
+    min-height: 550px;
+  }
+}
+
+.form_item {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+:deep(.el-dialog__body) {
+  padding: 20px 30px;
+}
+
+:deep(.el-form-item__label) {
+  font-weight: bold;
+}
+
+.shell-content-container {
+  display: flex;
+  gap: 20px;
+  min-height: 600px;
+}
+
+.left-form {
+  width: 300px;
+  padding: 20px;
+  // background-color: #f8f9fa;
+  border-radius: 4px;
+
+  .form_item {
+    margin-bottom: 20px;
+
+    :deep(.el-form-item__label) {
+      padding-bottom: 8px;
+      font-weight: bold;
+    }
+  }
+}
+
+.right-editor {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  .editor-label {
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #606266;
+  }
+
+  .json-editor-container {
+    flex: 1;
+    height: 100%;
+    min-height: 550px;
+    border: 1px solid #dcdfe6;
+    border-radius: 4px;
   }
 }
 </style>
