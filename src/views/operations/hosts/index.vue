@@ -2,10 +2,10 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-07 20:38:26
+ * @LastEditTime: 2024-11-07 22:18:26
 -->
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { hostsList, updateGo, disableGo } from "../operationsJS";
 import type { hostDisable, hostsUpdate, hostsResult } from "@/types/operations";
 
@@ -16,9 +16,13 @@ const listDatas = ref<any[]>([]);
 
 const popBoxTit = ref("");
 
+const socket = ref<WebSocket | null>(null);
+const wsData = ref<any>(null);
+
 const loading = ref(false);
 const dialogFormVisible = ref(false);
 const dialogShellVisible = ref(false);
+const dialogWSVisible = ref(false);
 
 const infoRef = ref<any>({
   id: "",
@@ -91,6 +95,70 @@ const disable = async (row: hostDisable) => {
   }
 };
 
+// // WebSocket 相关配置
+// const hostIp = "{{ host_ip }}"; // 从后端传递的主机 IP
+
+// 初始化 WebSocket
+const initWebSocket = (hostIp: string) => {
+  // const fallbackIp = "127.0.0.1";
+  const wsPort = "8080";
+  let wsUrl = `ws://${hostIp}:${wsPort}/ws`;
+  socket.value = new WebSocket(wsUrl);
+
+  socket.value.onopen = () => {
+    console.log("WebSocket 连接已建立", socket.value);
+    // 可以在这里初始化图表
+  };
+
+  socket.value.onmessage = (event) => {
+    try {
+      const sysInfo = JSON.parse(event.data);
+      wsData.value = sysInfo; // 更新 WebSocket 数据
+      // 在这里更新图表
+    } catch (error) {
+      console.error("解析 WebSocket 数据失败:", error);
+    }
+  };
+
+  socket.value.onclose = (event) => {
+    if (event.wasClean) {
+      console.log(
+        `WebSocket 连接正常关闭, code=${event.code}, reason=${event.reason}`
+      );
+    } else {
+      console.error("WebSocket 连接意外关闭");
+    }
+  };
+};
+
+// 查看 - 建立 WebSocket 连接
+const check = (row: hostsResult) => {
+  dialogWSVisible.value = true;
+  popBoxTit.value = `查看 ${row.host_ip} 信息`;
+  // wsUrl = `ws://${row.host_ip}:${wsPort}/ws`; // 更新 WebSocket URL
+  initWebSocket(row.host_ip); // 初始化 WebSocket
+};
+
+// 关闭 WebSocket 连接
+const closeWebSocket = () => {
+  if (socket.value) {
+    socket.value.close();
+    socket.value = null;
+    wsData.value = null;
+  }
+};
+
+// 修改 handleClose 函数
+const handleClose = () => {
+  closeWebSocket();
+  resetInfo();
+};
+
+// 在组件卸载时确保关闭 WebSocket
+onUnmounted(() => {
+  closeWebSocket();
+});
+
 // 修改
 const revise = (row: hostsResult) => {
   // console.log(parent);
@@ -107,10 +175,6 @@ const revise = (row: hostsResult) => {
 };
 
 // 弹框
-
-const handleClose = () => {
-  resetInfo();
-};
 
 const Cancel = () => {
   resetInfo();
@@ -369,6 +433,23 @@ const handleCurrentChange = (val: number) => {
         </template>
       </el-dialog>
       <!-- 弹框end -->
+      <!-- 查看-->
+      <el-dialog
+        v-model="dialogWSVisible"
+        destroy-on-close
+        center
+        :title="popBoxTit"
+        width="1400px"
+        @close="handleClose"
+      >
+        <div class="ws-content">
+          <pre v-if="wsData" class="json-content">{{
+            JSON.stringify(wsData, null, 2)
+          }}</pre>
+          <div v-else class="loading-content">等待数据...</div>
+        </div>
+      </el-dialog>
+      <!-- 查看end -->
     </el-card>
   </div>
 </template>
@@ -414,5 +495,27 @@ const handleCurrentChange = (val: number) => {
   padding: 20px;
   background-color: #f40303;
   border: 1px solid #ef0202;
+}
+
+.ws-content {
+  min-height: 200px;
+  padding: 16px;
+  background-color: #f5f7fa;
+  border-radius: 4px;
+
+  .json-content {
+    margin: 0;
+    font-family: monospace;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+  }
+
+  .loading-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: #909399;
+  }
 }
 </style>
