@@ -2,17 +2,18 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-20 20:34:59
- * @LastEditTime: 2024-11-04 00:07:24
+ * @LastEditTime: 2024-11-07 20:17:19
  */
 
 import { ElMessage } from "element-plus";
-import type { hostsDel, hostsUpdate } from "@/types/operations";
+import type { hostDisable, hostsUpdate } from "@/types/operations";
 
 import operationsAPI from "@/api/operationsAPI";
 
 // 实例化
 
 export async function hostsList() {
+  console.log("刷新list");
   await new Promise((resolve) => setTimeout(resolve, 1000)); // 添加1秒延迟
 
   try {
@@ -26,21 +27,21 @@ export async function hostsList() {
   }
 }
 
-export async function delGo(data: hostsDel) {
+export async function disableGo(data: hostDisable) {
   try {
-    const response = await operationsAPI.requestHostDel(data);
-    console.log("删除成功", response);
+    const response = await operationsAPI.requestHostDisable(data);
+    console.log("成功", response);
 
     ElMessage({
       showClose: true,
-      message: "删除成功",
+      message: "成功",
       type: "success",
     });
   } catch (error) {
-    console.log("删除失败:", error);
+    console.log("失败:", error);
     ElMessage({
       showClose: true,
-      message: "删除失败",
+      message: "失败",
       type: "error",
     });
   }
