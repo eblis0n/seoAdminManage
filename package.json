@@ -4,18 +4,19 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc --noEmit & vite build",
+    "dev": "vite --mode development",
+    "dev:prod": "vite --mode prod",
+    "build": "vite build --mode prod",
+    "build:dev": "vite build --mode development",
     "preview": "vite preview",
-    "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",
-    "lint:eslint": "eslint  --fix --ext .ts,.js,.vue ./src ",
-    "lint:prettier": "prettier --write \"**/*.{js,cjs,ts,json,tsx,css,less,scss,vue,html,md}\"",
-    "lint:stylelint": "stylelint  \"**/*.{css,scss,vue}\" --fix",
-    "lint:lint-staged": "lint-staged",
-    "preinstall": "npx only-allow pnpm",
-    "prepare": "husky",
-    "commit": "git-cz"
+    "lint": "npm run lint:js && npm run lint:prettier",
+    "lint:js": "eslint --cache --ext .js,.jsx,.ts,.tsx,.vue ./src",
+    "lint:prettier": "prettier --check \"src/**/*.(js|jsx|tsx|ts|vue|css|less)\"",
+    "lint:fix": "npm run lint:js -- --fix && npm run lint:prettier -- --write",
+    "prepare": "husky install",
+    "commit": "git-cz",
+    "test": "echo 'No tests specified'"
   },
   "config": {
     "commitizen": {
@@ -56,6 +57,7 @@
     "echarts": "^5.5.1",
     "element-plus": "^2.8.5",
     "exceljs": "^4.4.0",
+    "file-saver": "^2.0.5",
     "jsoneditor": "^10.1.0",
     "lodash-es": "^4.17.21",
     "nprogress": "^0.2.0",
@@ -68,8 +70,7 @@
     "vue": "^3.5.11",
     "vue-i18n": "9.9.1",
     "vue-router": "^4.4.5",
-    "vue3-clipboard": "^1.0.0",
-    "xlsx": "^0.18.5"
+    "vue3-clipboard": "^1.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
@@ -77,6 +78,7 @@
     "@iconify-json/ep": "^1.2.0",
     "@jridgewell/sourcemap-codec": "^1.5.0",
     "@types/codemirror": "^5.60.15",
+    "@types/file-saver": "^2.0.7",
     "@types/jsoneditor": "^9.9.5",
     "@types/lodash": "^4.17.7",
     "@types/node": "^22.7.5",
@@ -97,7 +99,7 @@
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-vue": "^9.28.0",
     "fast-glob": "^3.3.2",
-    "husky": "^9.1.5",
+    "husky": "^8.0.0",
     "lint-staged": "^15.2.10",
     "postcss": "^8.4.45",
     "postcss-html": "^1.7.0",
@@ -117,15 +119,15 @@
     "unplugin-auto-import": "^0.18.3",
     "unplugin-vue-components": "^0.27.4",
     "vite": "^5.4.3",
-    "vite-plugin-mock-dev-server": "^1.7.1",
+    "vite-plugin-mock-dev-server": "^1.5.0",
     "vite-plugin-svg-icons": "^2.0.1",
     "vite-plugin-vue-devtools": "^7.4.4",
     "vue-tsc": "^2.1.6"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
-  "repository": "https://gitee.com/youlaiorg/vue3-element-admin.git",
-  "author": "有来开源组织",
-  "license": "MIT"
+  "repository": "123",
+  "author": "eblis",
+  "license": "123"
 }

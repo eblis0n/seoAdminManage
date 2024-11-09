@@ -1,0 +1,18 @@
+@use "sass:math";
+
+@forward "element-plus/theme-chalk/src/common/var.scss" with (
+  $colors: (
+    "primary": (
+      "base": #409eff,
+    ),
+  ),
+  $button-padding-horizontal: (
+    "default": 16px,
+  ),
+  $button-padding-vertical: (
+    "default": 8px,
+  ),
+  $button-font-size: (
+    "default": 14px,
+  )
+);

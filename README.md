@@ -61,7 +61,7 @@
 | 环境                 | 名称版本                                                     | 下载地址                                                     |
 | -------------------- | :----------------------------------------------------------- | ------------------------------------------------------------ |
 | **开发工具**         | VSCode    | [下载](https://code.visualstudio.com/Download)           |
-| **运行环境**         | Node ≥18 (其中 20.6.0 版本不可用)    | [下载](http://nodejs.cn/download)                        |
+| **运行环境**         | Node ≥20    | [下载](http://nodejs.cn/download)                        |
 
 
 ## 项目启动
@@ -73,17 +73,17 @@ git clone https://gitee.com/youlaiorg/vue3-element-admin.git
 # 切换目录
 cd vue3-element-admin
 
-# 安装 pnpm
-npm install pnpm -g
+# 安装 npm
+npm install npm -g
 
 # 设置镜像源(可忽略)
-pnpm config set registry https://registry.npmmirror.com
+npm config set registry https://registry.npmmirror.com
 
 # 安装依赖
-pnpm install
+npm install
 
 # 启动运行
-pnpm run dev
+npm run dev
 ```
 
 
@@ -92,7 +92,7 @@ pnpm run dev
 
 ```bash
 # 项目打包
-pnpm run build
+npm run build
 
 # 上传文件至远程服务器
 将本地打包生成的 dist 目录下的所有文件拷贝至服务器的 /usr/share/nginx/html 目录。
@@ -140,7 +140,7 @@ server {
 
 - **项目同步仓库更新升级**
 
-  项目同步仓库更新升级之后，建议 `pnpm install` 安装更新依赖之后启动 。
+  项目同步仓库更新升级之后，建议 `npm install` 安装更新依赖之后启动 。
 
 - **项目组件、函数和引用爆红**
 
@@ -162,7 +162,7 @@ server {
 
 ## 提交规范
 
-执行 `pnpm run commit` 唤起 git commit 交互，根据提示完成信息的输入和选择。
+执行 `npm run commit` 唤起 git commit 交互，根据提示完成信息的输入和选择。
 
 ![](https://foruda.gitee.com/images/1687755823165218215/c1705416_716974.png)
 
@@ -188,12 +188,11 @@ Thanks to all the contributors!
 >
 > 为确保交流群质量，防止营销广告人群混入，我们采取了此措施。望各位理解！
 
-| 公众号 | 交流群 |
-|:----:|:----:|
-| ![有来技术公众号二维码](https://foruda.gitee.com/images/1687689212187063809/3c69eaee_716974.png) | ![交流群二维码](https://foruda.gitee.com/images/1687689212139273561/6a65ef69_716974.png) |
+
+
 
 
 ## 插件安装
 
-pnpm install xlsx
+npm install xlsx
 

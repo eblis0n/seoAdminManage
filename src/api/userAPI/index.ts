@@ -2,18 +2,18 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2023-10-17 21:21:36
- * @LastEditTime: 2024-10-13 16:15:37
+ * @LastEditTime: 2024-11-09 20:43:41
  */
 //统一管理域名相关的接口
 import request from "@/utils/axios/request";
 
 //引入接口类型
-import type { ListResponseModel } from "@/types/other";
+// import type { ListResponseModel } from "@/types/other";
 
 import type { UserInfo } from "@/types/user";
 
 enum API {
-  USER_LIST = "/sys/user/list/",
+  // USER_LIST = "/sys/user/list/",
   USER_INFO = "/sys/user/info/",
   // ADS_INSERT  = '/ads/insert/',
   // ADS_UPDATE = '/ads/update/',
@@ -21,7 +21,7 @@ enum API {
 }
 class UserAPI {
   // 获取列表
-  static getUserList = () => request.get<any, ListResponseModel>(API.USER_LIST);
+  // static getUserList = () => request.get<any, ListResponseModel>(API.USER_LIST);
   // 用户信息
   static getUserInfo = () => request.get<any, UserInfo>(API.USER_INFO);
 }

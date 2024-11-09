@@ -2,14 +2,13 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-20 20:34:59
- * @LastEditTime: 2024-11-01 19:32:21
+ * @LastEditTime: 2024-11-09 20:33:10
  */
 
 import { ElMessage } from "element-plus";
-import * as XLSX from "xlsx";
-
 import outcomeAPI from "@/api/outcomeAPI";
 import type { outcomeParams, outcomeExportParams } from "@/types/outcome";
+export { exportToExcel } from "@/utils/excel";
 
 // 实例化
 
@@ -41,8 +40,8 @@ export async function totalGo(params: outcomeParams) {
   }
 }
 
-// 导出Excel功能
-export async function exportToExcel(data: outcomeExportParams) {
+// 修改导出Excel功能的包装函数名称
+export async function exportToExcelWrapper(data: outcomeExportParams) {
   if (data.exportD.length === 0) {
     ElMessage.warning("没有可导出的数据");
     return false;
@@ -54,48 +53,22 @@ export async function exportToExcel(data: outcomeExportParams) {
   }
 
   try {
-    // 格式化数据
-    const exportData = data.exportD.map((item) => ({
-      ID: item.id,
-      URL: item.url,
-      投放平台: item.platform,
-      类型:
-        item.genre === "0"
-          ? "重定向"
-          : item.genre === "1"
-            ? "镜像"
-            : item.genre === "2"
-              ? "留痕"
-              : "未知",
-      添加时间: item.created_at,
-    }));
+    const success = await exportToExcel(data);
 
-    // 创建工作簿
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(exportData);
+    if (success) {
+      // 收集所有URL
+      const urldatas = data.exportD.map((item) => item.url).join(",");
 
-    // 添加工作表到工作簿
-    XLSX.utils.book_append_sheet(wb, ws, `${data.title}发布结果`);
+      // 执行删除操作
+      await outcomeAPI.requesOutcomDeleteData({
+        platform: data.title,
+        urldatas: urldatas,
+      });
 
-    // 生成文件名
-    const fileName = `${data.title}发布结果_${new Date().toLocaleDateString().replace(/\//g, "-")}.xlsx`;
-
-    // 导出文件
-    XLSX.writeFile(wb, fileName);
-
-    // 收集所有URL
-    const urldatas = data.exportD.map((item) => item.url).join(",");
-
-    const datas = {
-      platform: `${data.title}`,
-      urldatas: urldatas,
-    };
-
-    // 执行删除操作
-    await outcomeAPI.requesOutcomDeleteData(datas);
-
-    ElMessage.success("导出成功并清除数据");
-    return true;
+      ElMessage.success("导出成功并清除数据");
+      return true;
+    }
+    return false;
   } catch (error) {
     console.error("导出失败:", error);
     ElMessage.error("导出失败");

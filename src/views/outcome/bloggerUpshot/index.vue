@@ -2,12 +2,13 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-05 03:28:38
+ * @LastEditTime: 2024-11-09 19:39:35
 -->
+
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { ElMessage } from "element-plus";
-import { upshotList, totalGo, exportToExcel } from "../upshotJS";
+import { upshotList, totalGo, exportToExcelWrapper } from "../upshotJS";
 
 const currentPage = ref(1); // 当前页码
 const pageSize = ref(10); // 每页显示的数据数量
@@ -57,7 +58,6 @@ const total = async () => {
   try {
     totalVal.value = await totalGo({ platform: "blogger" });
     ElMessage.success("刷新成功");
-    // console.log("totalVal.value", totalVal.value);
   } catch (error) {
     console.error("获取总数失败", error);
     ElMessage.error("获取总数失败");
@@ -66,8 +66,9 @@ const total = async () => {
     loading.value = false;
   }
 };
+
 // 导出
-const exporData = async () => {
+const exportData = async () => {
   if (listDatas.value.length === 0) {
     ElMessage.warning("没有可导出的数据");
     return;
@@ -78,7 +79,7 @@ const exporData = async () => {
       title: "blogger",
       exportD: listDatas.value,
     };
-    const success = await exportToExcel(data);
+    const success = await exportToExcelWrapper(data); // 修改为调用包装函数
     if (success) {
       // 导出成功后重新加载数据
       await initData();
@@ -91,10 +92,12 @@ const exporData = async () => {
 const handleSizeChange = (val: number) => {
   console.log(`${val} items per page`);
 };
+
 const handleCurrentChange = (val: number) => {
   console.log(`current page: ${val}`);
 };
 </script>
+
 <template>
   <div class="blogger-container" v-loading="loading">
     <el-card shadow="never">
@@ -107,7 +110,7 @@ const handleCurrentChange = (val: number) => {
         </el-col>
         <el-col :span="2">
           <div class="grid-content ep-bg-purple" />
-          <el-button type="primary" plain @click="exporData">导出</el-button>
+          <el-button type="primary" plain @click="exportData">导出</el-button>
         </el-col>
       </el-row>
       <el-row class="row-bg">
@@ -193,10 +196,6 @@ const handleCurrentChange = (val: number) => {
 }
 
 .m-2 {
-  width: 300px;
-}
-
-.form_item {
   width: 300px;
 }
 </style>

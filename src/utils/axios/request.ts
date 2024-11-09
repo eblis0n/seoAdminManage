@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-10-08 20:30:06
- * @LastEditTime: 2024-10-22 00:33:37
+ * @LastEditTime: 2024-11-09 20:48:12
  */
 import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { useUserStoreHook } from "@/store/modules/user";
@@ -15,7 +15,7 @@ import qs from "qs";
 // 创建 axios 实例
 const service = axios.create({
   baseURL: import.meta.env.VITE_BASE_API,
-  timeout: import.meta.env.VITE_TIMEOUT || 50000,
+  timeout: Number(import.meta.env.VITE_TIMEOUT),
   headers: { "Content-Type": "application/json;charset=utf-8" },
   paramsSerializer: (params) => {
     return qs.stringify(params);

@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-05 03:28:51
+ * @LastEditTime: 2024-11-09 19:40:26
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -39,6 +39,7 @@ const initData = async () => {
     totalVal.value = totalData;
   } catch (error) {
     console.error("获取数据失败", error);
+    ElMessage.error("获取数据失败");
   } finally {
     loading.value = false;
   }
@@ -57,7 +58,6 @@ const total = async () => {
   try {
     totalVal.value = await totalGo({ platform: "telegra" });
     ElMessage.success("刷新成功");
-    // console.log("totalVal.value", totalVal.value);
   } catch (error) {
     console.error("获取总数失败", error);
     ElMessage.error("获取总数失败");
@@ -66,8 +66,9 @@ const total = async () => {
     loading.value = false;
   }
 };
+
 // 导出
-const exporData = async () => {
+const exportData = async () => {
   if (listDatas.value.length === 0) {
     ElMessage.warning("没有可导出的数据");
     return;
@@ -80,9 +81,11 @@ const exporData = async () => {
     };
     const success = await exportToExcel(data);
     if (success) {
-      // 导出成功后重新加载数据
-      await initData();
+      ElMessage.success("导出成功");
+      await initData(); // 导出成功后重新加载数据
     }
+  } catch (error) {
+    ElMessage.error("导出失败");
   } finally {
     loading.value = false;
   }
@@ -91,10 +94,12 @@ const exporData = async () => {
 const handleSizeChange = (val: number) => {
   console.log(`${val} items per page`);
 };
+
 const handleCurrentChange = (val: number) => {
   console.log(`current page: ${val}`);
 };
 </script>
+
 <template>
   <div class="telegra-container" v-loading="loading">
     <el-card shadow="never">
@@ -107,7 +112,7 @@ const handleCurrentChange = (val: number) => {
         </el-col>
         <el-col :span="2">
           <div class="grid-content ep-bg-purple" />
-          <el-button type="primary" plain @click="exporData">导出</el-button>
+          <el-button type="primary" plain @click="exportData">导出</el-button>
         </el-col>
       </el-row>
       <el-row class="row-bg">
@@ -152,7 +157,7 @@ const handleCurrentChange = (val: number) => {
           v-model:page-size="pageSize"
           :page-sizes="[10, 20, 50, 100]"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="listDatas.length"
+          :total="totalVal"
           @current-change="handleCurrentChange"
           @size-change="handleSizeChange"
         />
@@ -193,10 +198,6 @@ const handleCurrentChange = (val: number) => {
 }
 
 .m-2 {
-  width: 300px;
-}
-
-.form_item {
   width: 300px;
 }
 </style>
