@@ -2,11 +2,15 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-20 20:34:59
- * @LastEditTime: 2024-11-07 20:17:19
+ * @LastEditTime: 2024-11-09 22:30:32
  */
 
 import { ElMessage } from "element-plus";
-import type { hostDisable, hostsUpdate } from "@/types/operations";
+import type {
+  hostDisable,
+  hostsUpdate,
+  postTaskInsert,
+} from "@/types/operations";
 
 import operationsAPI from "@/api/operationsAPI";
 
@@ -50,6 +54,26 @@ export async function disableGo(data: hostDisable) {
 export async function updateGo(data: hostsUpdate) {
   try {
     const response = await operationsAPI.requestHostUpdate(data);
+    console.log("更新成功", response);
+
+    ElMessage({
+      showClose: true,
+      message: "更新成功",
+      type: "success",
+    });
+  } catch (error) {
+    console.log("更新失败:", error);
+    ElMessage({
+      showClose: true,
+      message: "更新失败",
+      type: "error",
+    });
+  }
+}
+
+export async function tasksInsertGo(data: postTaskInsert) {
+  try {
+    const response = await operationsAPI.requestTasksInsert(data);
     console.log("更新成功", response);
 
     ElMessage({

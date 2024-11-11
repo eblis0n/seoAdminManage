@@ -1,3 +1,9 @@
+/*
+ * @version: 1.0.0
+ * @Author: Eblis
+ * @Date: 2024-10-11 23:58:30
+ * @LastEditTime: 2024-11-10 15:03:39
+ */
 // uno.config.ts
 import {
   defineConfig,
@@ -32,7 +38,13 @@ export default defineConfig({
   presets: [
     presetUno(),
     presetAttributify(),
-    presetIcons(),
+    presetIcons({
+      scale: 1.2,
+      warn: true,
+      collections: {
+        ep: () => import("@iconify-json/ep/icons.json").then((i) => i.default), // Element Plus 图标
+      },
+    }),
     presetTypography(),
     presetWebFonts({
       fonts: {

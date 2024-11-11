@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-20 20:34:59
- * @LastEditTime: 2024-10-28 20:43:29
+ * @LastEditTime: 2024-11-11 16:02:52
  */
 
 import { ElMessage } from "element-plus";
@@ -18,7 +18,12 @@ export async function splicingList() {
   try {
     const response = await splicingAPI.requestSplicingList();
     console.log("刷新list", response);
-    return response;
+    const sortedData = response.sort((a: any, b: any) => {
+      return (
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+    });
+    return sortedData;
   } catch (error) {
     console.error("加载列表失败:", error);
     ElMessage.error("加载列表失败");

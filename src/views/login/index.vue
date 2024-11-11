@@ -44,7 +44,7 @@
           <!-- 用户名 -->
           <el-form-item prop="username">
             <div class="input-wrapper">
-              <i-ep-user class="mx-2" />
+              <div class="i-ep-user mx-2"></div>
               <el-input
                 ref="username"
                 v-model="loginData.username"
@@ -64,7 +64,7 @@
           >
             <el-form-item prop="password">
               <div class="input-wrapper">
-                <i-ep-lock class="mx-2" />
+                <div class="i-ep-lock mx-2"></div>
                 <el-input
                   v-model="loginData.password"
                   :placeholder="$t('login.password')"
@@ -108,7 +108,6 @@ import type { LoginData } from "@/types/auth.d.ts";
 import router from "@/router";
 import defaultSettings from "@/settings";
 import { ThemeEnum } from "@/enums/ThemeEnum";
-
 // 类型定义
 import type { FormInstance } from "element-plus";
 

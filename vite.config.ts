@@ -7,6 +7,7 @@ import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 import { createSvgIconsPlugin } from "vite-plugin-svg-icons";
 import mockDevServerPlugin from "vite-plugin-mock-dev-server";
 import UnoCSS from "unocss/vite";
+import { presetIcons } from "unocss";
 import { resolve } from "path";
 import {
   name,
@@ -62,7 +63,10 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       vue(),
       vueJsx(),
       env.VITE_MOCK_DEV_SERVER === "true" ? mockDevServerPlugin() : null,
-      UnoCSS({ hmrTopLevelAwait: false }),
+      UnoCSS({
+        // 移除 hmrTopLevelAwait: false 配置
+        // 因为这个配置在新版本中可能不再需要
+      }),
       AutoImport({
         imports: ["vue", "@vueuse/core", "pinia", "vue-router", "vue-i18n"],
         resolvers: [ElementPlusResolver({ importStyle: "sass" })],

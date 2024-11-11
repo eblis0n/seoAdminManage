@@ -2,13 +2,13 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-20 20:34:59
- * @LastEditTime: 2024-11-09 20:33:10
+ * @LastEditTime: 2024-11-11 15:59:43
  */
 
 import { ElMessage } from "element-plus";
 import outcomeAPI from "@/api/outcomeAPI";
 import type { outcomeParams, outcomeExportParams } from "@/types/outcome";
-export { exportToExcel } from "@/utils/excel";
+import { exportToExcel } from "@/utils/excel";
 
 // 实例化
 
@@ -18,7 +18,13 @@ export async function upshotList(params: outcomeParams) {
   try {
     const response = await outcomeAPI.requesOutcomeList(params);
     console.log("刷新list", response);
-    return response;
+    // 对数据进行排序
+    const sortedData = response.sort((a: any, b: any) => {
+      return (
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+    });
+    return sortedData;
   } catch (error) {
     console.error("加载列表失败:", error);
     ElMessage.error("加载列表失败");

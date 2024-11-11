@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-10 15:43:48
+ * @LastEditTime: 2024-11-11 15:55:55
 -->
 <script setup lang="ts">
 import { onMounted, onUnmounted, shallowRef, nextTick } from "vue";
@@ -12,11 +12,6 @@ import type {
   postTaskInsert,
   hostsResult,
 } from "@/types/operations";
-
-import JSONEditor from "jsoneditor";
-import "jsoneditor/dist/jsoneditor.css";
-
-import type { JSONEditorMode } from "jsoneditor";
 
 const currentPage = ref(1); // 当前页码
 const pageSize = ref(10); // 每页显示的数据数量
@@ -30,8 +25,6 @@ const wsData = ref<any>(null);
 
 const loading = ref(false);
 const dialogFormVisible = ref(false);
-const dialogShellVisible = ref(false);
-const dialogWSVisible = ref(false);
 
 // 添加定时器引用
 const timer = ref<ReturnType<typeof setInterval> | null>(null);
@@ -45,14 +38,6 @@ const infoRef = ref<any>({
   remark: "",
   ping_time: "",
   online: "",
-});
-
-const shellRef = ref<any>({
-  id: "",
-  host_ip: "",
-  task_type: "software",
-  script_name: "",
-  script_content: {},
 });
 
 const taskTypeOptions = [

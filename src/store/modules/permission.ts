@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-09-27 14:48:06
- * @LastEditTime: 2024-10-12 19:22:44
+ * @LastEditTime: 2024-11-10 15:44:15
  */
 import { RouteRecordRaw } from "vue-router";
 import { constantRoutes } from "@/router";
@@ -27,11 +27,14 @@ export const usePermissionStore = defineStore("permission", () => {
     return new Promise<RouteRecordRaw[]>((resolve, reject) => {
       MenuAPI.getRoutes()
         .then((data) => {
+          console.log("Received data from API:", data);
           const dynamicRoutes = transformRoutes(data);
+          console.log("Generated dynamic routes:", dynamicRoutes);
           routes.value = constantRoutes.concat(dynamicRoutes);
           resolve(dynamicRoutes);
         })
         .catch((error) => {
+          console.error("Error fetching routes:", error);
           reject(error);
         });
     });
@@ -46,6 +49,8 @@ export const usePermissionStore = defineStore("permission", () => {
     const matchedItem = routes.value.find((item) => item.path === topMenuPath);
     if (matchedItem && matchedItem.children) {
       mixLeftMenus.value = matchedItem.children;
+    } else {
+      console.log("No matching item found for top menu path:", topMenuPath); // 打印没有找到匹配项的情况
     }
   };
 
@@ -62,8 +67,10 @@ export const usePermissionStore = defineStore("permission", () => {
  */
 const transformRoutes = (routes: RouteVO[]) => {
   const asyncRoutes: RouteRecordRaw[] = [];
+
   routes.forEach((route) => {
     const tmpRoute = { ...route } as RouteRecordRaw;
+
     // 顶级目录，替换为 Layout 组件
     if (tmpRoute.component?.toString() == "Layout") {
       tmpRoute.component = Layout;
@@ -87,10 +94,6 @@ const transformRoutes = (routes: RouteVO[]) => {
   return asyncRoutes;
 };
 
-/**
- * 在组件外使用 Pinia store 实例
- * @see https://pinia.vuejs.org/core-concepts/outside-component-usage.html
- */
 export function usePermissionStoreHook() {
   return usePermissionStore(store);
 }

@@ -2,12 +2,12 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-09 19:40:26
+ * @LastEditTime: 2024-11-10 15:15:28
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { ElMessage } from "element-plus";
-import { upshotList, totalGo, exportToExcel } from "../upshotJS";
+import { upshotList, totalGo, exportToExcelWrapper } from "../upshotJS";
 
 const currentPage = ref(1); // 当前页码
 const pageSize = ref(10); // 每页显示的数据数量
@@ -79,7 +79,7 @@ const exportData = async () => {
       title: "telegra",
       exportD: listDatas.value,
     };
-    const success = await exportToExcel(data);
+    const success = await exportToExcelWrapper(data);
     if (success) {
       ElMessage.success("导出成功");
       await initData(); // 导出成功后重新加载数据
