@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-20 20:34:59
- * @LastEditTime: 2024-11-09 22:30:32
+ * @LastEditTime: 2024-11-11 22:31:38
  */
 
 import { ElMessage } from "element-plus";
@@ -10,6 +10,7 @@ import type {
   hostDisable,
   hostsUpdate,
   postTaskInsert,
+  taskImplementLogs,
 } from "@/types/operations";
 
 import operationsAPI from "@/api/operationsAPI";
@@ -88,5 +89,35 @@ export async function tasksInsertGo(data: postTaskInsert) {
       message: "更新失败",
       type: "error",
     });
+  }
+}
+
+export async function tasksList() {
+  console.log("刷新list");
+  await new Promise((resolve) => setTimeout(resolve, 1000)); // 添加1秒延迟
+
+  try {
+    const response = await operationsAPI.requestTasksList();
+    console.log("刷新list", response);
+    return response;
+  } catch (error) {
+    console.error("加载列表失败:", error);
+    ElMessage.error("加载列表失败");
+    return [];
+  }
+}
+
+export async function tasksImplementLogs(data: taskImplementLogs) {
+  console.log("刷新logs信息");
+  await new Promise((resolve) => setTimeout(resolve, 1000)); // 添加1秒延迟
+
+  try {
+    const response = await operationsAPI.requestTasksImplementLogs(data);
+    console.log("刷新logs信息", response);
+    return response;
+  } catch (error) {
+    console.error("加载列表失败:", error);
+    ElMessage.error("加载列表失败");
+    return [];
   }
 }

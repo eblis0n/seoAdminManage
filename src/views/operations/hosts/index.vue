@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-10 15:43:48
+ * @LastEditTime: 2024-11-11 21:59:32
 -->
 <script setup lang="ts">
 import { onMounted, onUnmounted, shallowRef, nextTick } from "vue";
@@ -337,7 +337,7 @@ const shellScript = async (row: postTaskInsert) => {
     script_content: {},
   };
 
-  popBoxTit.value = "执行脚本";
+  popBoxTit.value = "执行任务";
   dialogShellVisible.value = true;
 
   // 等待 DOM 更新后初始化编辑器
@@ -477,8 +477,13 @@ const handleCurrentChange = (val: number) => {
                   <el-button type="primary" link @click="revise(row)">
                     修改
                   </el-button>
-                  <el-button type="primary" link @click="shellScript(row)">
-                    任务发起
+                  <el-button
+                    type="primary"
+                    link
+                    @click="shellScript(row)"
+                    v-if="row.online === '0' && row.is_disabled === '0'"
+                  >
+                    发布任务
                   </el-button>
                 </template>
               </el-table-column>
@@ -595,14 +600,14 @@ const handleCurrentChange = (val: number) => {
               <el-form-item label="IP地址" class="form_item">
                 <span>{{ shellRef.host_ip }}</span>
               </el-form-item>
-              <el-form-item label="脚本名称" class="form_item">
+              <el-form-item label="任务名称" class="form_item">
                 <el-input v-model="shellRef.script_name" autocomplete="off" />
               </el-form-item>
 
-              <el-form-item class="form_item" label="脚本类型">
+              <el-form-item class="form_item" label="任务类型">
                 <el-select
                   v-model="shellRef.task_type"
-                  placeholder="脚本类型"
+                  placeholder="任务类型"
                   size="large"
                   style="width: 100%"
                 >
@@ -615,12 +620,8 @@ const handleCurrentChange = (val: number) => {
                 </el-select>
               </el-form-item>
 
-              <el-form-item class="form_item" label="脚本模板">
-                <el-select
-                  placeholder="脚本模板"
-                  size="large"
-                  style="width: 100%"
-                >
+              <el-form-item class="form_item" label="选用模板">
+                <el-select placeholder="选用模板" size="large" style="width: 100%">
                   <el-option
                     v-for="item in taskTypeOptions"
                     :key="item.value"
@@ -634,7 +635,7 @@ const handleCurrentChange = (val: number) => {
 
           <!-- 右侧编辑器 -->
           <div class="right-editor">
-            <div class="editor-label">脚本内容</div>
+            <div class="editor-label">任务内容</div>
             <div ref="jsonEditorContainer" class="json-editor-container"></div>
           </div>
         </div>

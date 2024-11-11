@@ -2,67 +2,45 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-11 15:55:55
+ * @LastEditTime: 2024-11-11 23:09:19
 -->
 <script setup lang="ts">
-import { onMounted, onUnmounted, shallowRef, nextTick } from "vue";
-import { hostsList, updateGo, disableGo, tasksInsertGo } from "../operationsJS";
-import type {
-  hostDisable,
-  postTaskInsert,
-  hostsResult,
-} from "@/types/operations";
+import { onMounted } from "vue";
+import { tasksList, tasksImplementLogs } from "../operationsJS";
+import type { taskResult, taskImplementLogs } from "@/types/operations";
+
+import JSONEditor from "jsoneditor";
+import "jsoneditor/dist/jsoneditor.css";
+
+import type { JSONEditorMode } from "jsoneditor";
 
 const currentPage = ref(1); // 当前页码
 const pageSize = ref(10); // 每页显示的数据数量
 
 const listDatas = ref<any[]>([]);
+const logsDatas = ref<any[]>([]);
 
 const popBoxTit = ref("");
 
-const socket = ref<WebSocket | null>(null);
-const wsData = ref<any>(null);
-
 const loading = ref(false);
 const dialogFormVisible = ref(false);
+const dialogLogVisible = ref(false);
 
 // 添加定时器引用
 const timer = ref<ReturnType<typeof setInterval> | null>(null);
 const isAutoRefreshEnabled = ref(true); // 添加自动刷新开关状态
 
 const infoRef = ref<any>({
-  id: "",
+  task_id: "",
   host_ip: "",
-  host_group: "",
-  is_disabled: "0",
-  remark: "",
-  ping_time: "",
-  online: "",
+  script_name: "",
+  script_content: "",
+  status: "",
+  task_type: "",
+  result: "",
 });
 
-const taskTypeOptions = [
-  {
-    value: "software",
-    label: "软件",
-  },
-  {
-    value: "other",
-    label: "其他",
-  },
-];
-
-type online = "0" | "1";
-const onlineMap: Record<online, string> = {
-  "0": "在线",
-  "1": "离线",
-};
-
-type is_disabled = "0" | "1";
-
-const disabledMap: Record<is_disabled, string> = {
-  "0": "上架",
-  "1": "下架",
-};
+//  ########################### JSONEditor #####################################
 
 // 添加 JSONEditor 相关的 ref
 const jsonEditorContainer = ref<HTMLElement | null>(null);
@@ -70,14 +48,14 @@ let jsonEditorInstance: JSONEditor | null = null;
 
 // 添加 JSONEditor 配置选项
 const jsonEditorOptions = {
-  mode: "tree" as JSONEditorMode,
-  modes: ["tree", "view", "form", "code", "text"] as JSONEditorMode[],
+  mode: "code" as JSONEditorMode,
+  modes: ["code"] as JSONEditorMode[],
   onModeChange: function (newMode: JSONEditorMode, oldMode: JSONEditorMode) {
     console.log("Mode switched from", oldMode, "to", newMode);
   },
   onChangeText: function (jsonString: string) {
     try {
-      shellRef.value.script_content = JSON.parse(jsonString);
+      infoRef.value.script_content = JSON.parse(jsonString);
     } catch (err) {
       console.error("JSON parse error:", err);
     }
@@ -88,13 +66,21 @@ const jsonEditorOptions = {
 const initJsonEditor = () => {
   if (jsonEditorContainer.value) {
     try {
+      // 解析 script_content 为 JSON 对象
+      const scriptContent = JSON.parse(
+        infoRef.value.script_content.replace(/'/g, '"')
+      );
+
+      // 如果已经存在 jsonEditor 实例，则销毁旧实例
       if (jsonEditorInstance) {
         jsonEditorInstance.destroy();
       }
+
+      // 创建新的 JSONEditor 实例
       jsonEditorInstance = new JSONEditor(
         jsonEditorContainer.value,
         jsonEditorOptions,
-        shellRef.value.script_content || {}
+        scriptContent || {}
       );
     } catch (error) {
       console.error("JSONEditor initialization error:", error);
@@ -103,19 +89,13 @@ const initJsonEditor = () => {
   }
 };
 
-// 在组件卸载时销毁编辑器
-onUnmounted(() => {
-  if (jsonEditorInstance) {
-    jsonEditorInstance.destroy();
-    jsonEditorInstance = null;
-  }
-});
+//  ########################### JSONEditor  end #####################################
 
 // 接口相关
 const initData = async () => {
   loading.value = true;
   try {
-    const [listData] = await Promise.all([hostsList()]);
+    const [listData] = await Promise.all([tasksList()]);
     listDatas.value = listData;
   } catch (error) {
     console.error("获取数据失败", error);
@@ -129,159 +109,85 @@ onMounted(() => {
   initData();
 });
 
-// 在组件卸载时确保关闭 WebSocket
+// 在组件卸载时销毁编辑器
 onUnmounted(() => {
-  closeWebSocket();
+  if (jsonEditorInstance) {
+    jsonEditorInstance.destroy();
+    jsonEditorInstance = null;
+  }
 });
 
-const formatOnline = (row: { online: online }): string => {
-  return onlineMap[row.online] || "未知";
+// ############## 操作 ######################################
+
+const check = async (row: taskResult) => {
+  const data = {
+    task_id: row.task_id,
+    host_ip: row.host_ip,
+    task_type: row.task_type,
+    script_name: row.script_name,
+    script_content: row.script_content,
+    status: row.status,
+  };
+  infoRef.value = data;
+
+  dialogFormVisible.value = true;
+  popBoxTit.value = `查看  ${row.task_id} 任务详情`;
+
+  // 等待 DOM 更新后初始化编辑器
+  await nextTick();
+  initJsonEditor();
 };
 
-const formatdisabledMap = (row: { is_disabled: is_disabled }): string => {
-  return disabledMap[row.is_disabled] || "未知";
-};
-
-const disable = async (row: hostDisable) => {
+const checkLog = async (row: taskImplementLogs) => {
+  dialogLogVisible.value = true;
+  popBoxTit.value = `${row.task_id} 任务日志`;
   loading.value = true;
   try {
     const data = {
-      id: row.id,
-      is_disabled: row.is_disabled === "0" ? "1" : "0", // 切换状态
+      task_id: row.task_id,
     };
-    await disableGo(data);
+    const [logsData] = await Promise.all([tasksImplementLogs(data)]);
+    logsDatas.value = logsData;
   } catch (error) {
     console.log("出现异常:", error);
   } finally {
-    await initData();
     loading.value = false;
   }
 };
 
-// 初始化 WebSocket
-const initWebSocket = (hostIp: string) => {
-  // const fallbackIp = "127.0.0.1";
-  const wsPort = "8080";
-  let wsUrl = `ws://${hostIp}:${wsPort}/ws`;
-  socket.value = new WebSocket(wsUrl);
+// ############# 操作end ############################################
+// ############# 弹框 ############################################
 
-  socket.value.onopen = () => {
-    console.log("WebSocket 连接已建立", socket.value);
-    // 可以在这里初始化图表
-  };
-
-  socket.value.onmessage = (event) => {
-    try {
-      const sysInfo = JSON.parse(event.data);
-      wsData.value = sysInfo; // 更新 WebSocket 数据
-      // 在这里更新图表
-    } catch (error) {
-      console.error("解析 WebSocket 数据失败:", error);
-    }
-  };
-
-  socket.value.onclose = (event) => {
-    if (event.wasClean) {
-      console.log(
-        `WebSocket 连接正常关闭, code=${event.code}, reason=${event.reason}`
-      );
-    } else {
-      console.error("WebSocket 连接意外关闭");
-    }
-  };
-};
-
-// 查看 - 建立 WebSocket 连接
-const check = (row: hostsResult) => {
-  dialogWSVisible.value = true;
-  popBoxTit.value = `查看 ${row.host_ip} 信息`;
-  // wsUrl = `ws://${row.host_ip}:${wsPort}/ws`; // 更新 WebSocket URL
-  initWebSocket(row.host_ip); // 初始化 WebSocket
-};
-
-// 关闭 WebSocket 连接
-const closeWebSocket = () => {
-  if (socket.value) {
-    socket.value.close();
-    socket.value = null;
-    wsData.value = null;
-  }
-};
-
-const handleCloseForm = () => {
-  resetInfo();
-};
-
-const handleCloseWS = () => {
-  // 关闭 WebSocket 连接
-  closeWebSocket();
-  dialogWSVisible.value = false;
-};
-
-const handleCloseShell = () => {
+const handleCloseShell = async () => {
   // 销毁 JSONEditor 实例
   if (jsonEditorInstance) {
     jsonEditorInstance.destroy();
     jsonEditorInstance = null;
   }
 
-  // 重置表单数据
-  shellRef.value = {
-    host_ip: "",
-    task_type: "software",
-    script_name: "",
-    script_content: {},
+  popBoxTit.value = "";
+  infoRef.value = {
+    id: "",
+    task_id: "",
+    task_type: "",
+    log_content: "",
+    log_time: "",
+    status: "",
   };
-
-  // 关闭弹窗
-  dialogShellVisible.value = false;
-};
-
-// 修改
-const revise = (row: hostsResult) => {
-  // console.log(parent);
-  const data = {
-    id: row.id,
-    host_ip: row.host_ip,
-    is_disabled: row.is_disabled,
-    host_group: row.host_group,
-    remark: row.remark,
-  };
-  infoRef.value = data;
-  popBoxTit.value = "修改";
-  dialogFormVisible.value = true;
-};
-
-// 弹框
-
-const Cancel = () => {
-  resetInfo();
-};
-
-const save = async () => {
-  console.log("准提交数据：", infoRef.value);
-  console.log("当前提交行为:", popBoxTit.value);
   dialogFormVisible.value = false;
-  loading.value = true;
-
-  try {
-    // 修改
-    const data = {
-      id: infoRef.value.id,
-      is_disabled: infoRef.value.is_disabled,
-      host_group: infoRef.value.host_group,
-      remark: infoRef.value.remark,
-    };
-    await updateGo(data);
-  } catch (error) {
-    console.log("出现异常:", error);
-  } finally {
-    loading.value = false;
-    resetInfo();
-  }
+  await initData();
 };
 
-// 添加自动刷新控制函数
+const handleCloseLog = async () => {
+  popBoxTit.value = "";
+  dialogLogVisible.value = false;
+  await initData();
+};
+
+// ############# 弹框end ############################################
+
+// ############## 刷新 ##############################################
+
 const startAutoRefresh = () => {
   if (timer.value) {
     clearInterval(timer.value);
@@ -314,70 +220,16 @@ const refresh = () => {
   initData();
 };
 
-const shellScript = async (row: postTaskInsert) => {
-  shellRef.value = {
-    host_ip: row.host_ip,
-    task_type: "software",
-    script_name: "",
-    script_content: {},
-  };
+// ############## 刷新 end ############################################
 
-  popBoxTit.value = "执行脚本";
-  dialogShellVisible.value = true;
-
-  // 等待 DOM 更新后初始化编辑器
-  await nextTick();
-  initJsonEditor();
-};
-
-// 添加保存脚本的函数
-const saveScript = async () => {
-  console.log("准提交数据：", infoRef.value);
-  console.log("当前提交行为:", popBoxTit.value);
-  dialogShellVisible.value = false;
-  loading.value = true;
-  if (!jsonEditorInstance) return;
-
-  try {
-    const content = jsonEditorInstance.get();
-    const data = {
-      host_ip: shellRef.value.host_ip,
-      task_type: shellRef.value.task_type,
-      script_name: shellRef.value.script_name,
-      script_content: content,
-    };
-    await tasksInsertGo(data);
-
-    // 这里添加发送到后端的逻辑
-    console.log("准备保存的脚本内容:", content);
-  } catch (error) {
-    console.error("保存脚本失败:", error);
-  }
-};
-
-// 还原弹框输入
-const resetInfo = async () => {
-  // 还原初始化
-  popBoxTit.value = "";
-  infoRef.value = {
-    id: "",
-    host_ip: "",
-    host_group: "",
-    status: "0",
-    remark: "",
-    ping_time: "",
-    online: "",
-  };
-  dialogFormVisible.value = false;
-  await initData();
-};
-
+// ########################## 翻页 ################################
 const handleSizeChange = (val: number) => {
   console.log(`${val} items per page`);
 };
 const handleCurrentChange = (val: number) => {
   console.log(`current page: ${val}`);
 };
+// ########################## 翻页 end################################
 </script>
 <template>
   <div class="telegra-container" v-loading="loading">
@@ -410,60 +262,39 @@ const handleCurrentChange = (val: number) => {
                 )
               "
             >
-              <el-table-column prop="id" label="ID" align="center" />
+              <el-table-column prop="task_id" label="任务ID" align="center" />
               <el-table-column prop="host_ip" label="IP地址" align="center" />
-              <el-table-column prop="host_group" label="分组" align="center" />
-              <el-table-column prop="remark" label="备注" align="center" />
               <el-table-column
-                prop="ping_time"
-                label="最后在线时间"
+                prop="script_name"
+                label="任务名称"
                 align="center"
               />
-
-              <
-              <el-table-column prop="online" label="是否在线" align="center">
-                <template #default="{ row }">
-                  <span
-                    :class="row.online === '0' ? 'online-cell' : 'offline-cell'"
-                  >
-                    {{ formatOnline(row) }}
-                  </span>
-                </template>
-              </el-table-column>
-
               <el-table-column
-                prop="is_disabled"
-                label="状态"
+                prop="task_type"
+                label="任务类型"
                 align="center"
-                :formatter="formatdisabledMap"
+              />
+              <el-table-column prop="status" label="任务状态" align="center" />
+              <el-table-column
+                prop="created_at"
+                label="任务发布时间"
+                align="center"
+              />
+              <el-table-column prop="result" label="简述" align="center" />
+              <el-table-column
+                prop="completed_at"
+                label="完成时间"
+                align="center"
               />
 
               <el-table-column prop="operate" label="操作" align="center">
                 <template #default="{ row }">
                   <el-button type="primary" link @click="check(row)">
-                    查看
+                    详情
                   </el-button>
-                  <el-button
-                    type="primary"
-                    link
-                    @click="disable(row)"
-                    v-if="row.is_disabled === '0'"
-                  >
-                    下架
-                  </el-button>
-                  <el-button
-                    type="primary"
-                    link
-                    @click="disable(row)"
-                    v-if="row.is_disabled === '1'"
-                  >
-                    上架
-                  </el-button>
-                  <el-button type="primary" link @click="revise(row)">
-                    修改
-                  </el-button>
-                  <el-button type="primary" link @click="shellScript(row)">
-                    任务发起
+
+                  <el-button type="primary" link @click="checkLog(row)">
+                    日志
                   </el-button>
                 </template>
               </el-table-column>
@@ -484,89 +315,9 @@ const handleCurrentChange = (val: number) => {
         />
       </el-row>
 
-      <!-- 弹框 -->
+      <!-- 任务详情 -->
       <el-dialog
         v-model="dialogFormVisible"
-        destroy-on-close
-        center
-        :title="popBoxTit"
-        width="80%"
-        @close="handleCloseForm"
-      >
-        <el-form :model="infoRef">
-          <el-row class="row-bg flex items-center" :gutter="20">
-            <el-col :span="4">
-              <el-form-item label="id" class="form_item">
-                <span>{{ infoRef.id }}</span>
-              </el-form-item>
-            </el-col>
-            <el-col :span="4">
-              <el-form-item label="IP地址" class="form_item">
-                <span>{{ infoRef.host_ip }}</span>
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row class="row-bg flex items-center" :gutter="20">
-            <el-col :span="8">
-              <el-form-item label="分组" class="form_item">
-                <el-input v-model="infoRef.host_group" autocomplete="off" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="5">
-              <el-form-item class="form_item flex items-center" label="状态">
-                <div class="flex items-center">
-                  <el-radio-group v-model="infoRef.is_disabled" class="ml-4">
-                    <el-radio label="0" size="large">上架</el-radio>
-                    <el-radio label="1" size="large">下架</el-radio>
-                  </el-radio-group>
-                </div>
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row class="row-bg flex items-center" :gutter="20">
-            <el-col :span="8">
-              <el-form-item label="备注" class="form_item flex items-center">
-                <el-input
-                  v-model="infoRef.remark"
-                  style="width: 400px"
-                  :autosize="{ minRows: 4, maxRows: 10 }"
-                  type="textarea"
-                  placeholder="Please input"
-                />
-              </el-form-item>
-            </el-col>
-          </el-row>
-        </el-form>
-        <template #footer>
-          <span class="dialog-footer">
-            <el-button @click="Cancel">取消</el-button>
-            <el-button type="primary" @click="save">保存</el-button>
-          </span>
-        </template>
-      </el-dialog>
-      <!-- 弹框end -->
-
-      <!-- 查看-->
-      <el-dialog
-        v-model="dialogWSVisible"
-        destroy-on-close
-        center
-        :title="popBoxTit"
-        width="80%"
-        @close="handleCloseWS"
-      >
-        <div class="ws-content">
-          <pre v-if="wsData" class="json-content">{{
-            JSON.stringify(wsData, null, 2)
-          }}</pre>
-          <div v-else class="loading-content">等待数据...</div>
-        </div>
-      </el-dialog>
-      <!-- 查看end -->
-
-      <!-- shell脚本 -->
-      <el-dialog
-        v-model="dialogShellVisible"
         destroy-on-close
         center
         :title="popBoxTit"
@@ -576,43 +327,21 @@ const handleCurrentChange = (val: number) => {
         <div class="shell-content-container">
           <!-- 左侧表单 -->
           <div class="left-form">
-            <el-form :model="shellRef" label-position="top">
+            <el-form :model="infoRef" label-position="top">
+              <el-form-item label="任务ID" class="form_item">
+                <span>{{ infoRef.task_id }}</span>
+              </el-form-item>
               <el-form-item label="IP地址" class="form_item">
-                <span>{{ shellRef.host_ip }}</span>
+                <span>{{ infoRef.host_ip }}</span>
               </el-form-item>
               <el-form-item label="脚本名称" class="form_item">
-                <el-input v-model="shellRef.script_name" autocomplete="off" />
+                <span>{{ infoRef.script_name }}</span>
               </el-form-item>
-
-              <el-form-item class="form_item" label="脚本类型">
-                <el-select
-                  v-model="shellRef.task_type"
-                  placeholder="脚本类型"
-                  size="large"
-                  style="width: 100%"
-                >
-                  <el-option
-                    v-for="item in taskTypeOptions"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                  />
-                </el-select>
+              <el-form-item label="任务类型" class="form_item">
+                <span>{{ infoRef.task_type }}</span>
               </el-form-item>
-
-              <el-form-item class="form_item" label="脚本模板">
-                <el-select
-                  placeholder="脚本模板"
-                  size="large"
-                  style="width: 100%"
-                >
-                  <el-option
-                    v-for="item in taskTypeOptions"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                  />
-                </el-select>
+              <el-form-item label="任务状态" class="form_item">
+                <span>{{ infoRef.status }}</span>
               </el-form-item>
             </el-form>
           </div>
@@ -623,15 +352,79 @@ const handleCurrentChange = (val: number) => {
             <div ref="jsonEditorContainer" class="json-editor-container"></div>
           </div>
         </div>
-
-        <template #footer>
-          <span class="dialog-footer">
-            <el-button @click="handleCloseShell">取消</el-button>
-            <el-button type="primary" @click="saveScript">保存</el-button>
-          </span>
-        </template>
       </el-dialog>
-      <!-- shell脚本 end-->
+      <!-- 任务详情 end-->
+
+      <!-- 查看 任务执行log-->
+      <el-dialog
+        v-model="dialogLogVisible"
+        destroy-on-close
+        center
+        :title="popBoxTit"
+        width="80%"
+        @close="handleCloseLog"
+      >
+        <div class="telegra-container" v-loading="loading">
+          <el-card shadow="never">
+            <el-row class="row-bg">
+              <el-col>
+                <el-scrollbar>
+                  <el-table
+                    height="500"
+                    style="width: 100%"
+                    :data="
+                      logsDatas.slice(
+                        (currentPage - 1) * pageSize,
+                        currentPage * pageSize
+                      )
+                    "
+                  >
+                    <el-table-column prop="id" label="ID" align="center" />
+                    <el-table-column
+                      prop="task_id"
+                      label="任务ID"
+                      align="center"
+                    />
+                    <el-table-column
+                      prop="task_type"
+                      label="任务类型"
+                      align="center"
+                    />
+                    <el-table-column
+                      prop="log_content"
+                      label="log内容"
+                      align="center"
+                    />
+                    <el-table-column
+                      prop="log_time"
+                      label="执行时间"
+                      align="center"
+                    />
+                    <el-table-column
+                      prop="status"
+                      label="任务状态"
+                      align="center"
+                    />
+                  </el-table>
+                </el-scrollbar>
+              </el-col>
+            </el-row>
+            <el-row class="row-bg">
+              <el-pagination
+                background
+                v-model:current-page="currentPage"
+                v-model:page-size="pageSize"
+                :page-sizes="[10, 20, 50, 100]"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="listDatas.length"
+                @current-change="handleCurrentChange"
+                @size-change="handleSizeChange"
+              />
+            </el-row>
+          </el-card>
+        </div>
+      </el-dialog>
+      <!-- 查看任务执行log end -->
     </el-card>
   </div>
 </template>
