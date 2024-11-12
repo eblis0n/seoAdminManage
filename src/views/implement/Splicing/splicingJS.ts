@@ -2,11 +2,15 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-20 20:34:59
- * @LastEditTime: 2024-11-11 16:02:52
+ * @LastEditTime: 2024-11-12 23:06:04
  */
 
 import { ElMessage } from "element-plus";
-import type { splicingInsert, splicingPublish } from "@/types/splicing.d.ts";
+import type {
+  splicingInsert,
+  splicingPublish,
+  splicingTotal,
+} from "@/types/splicing.d.ts";
 
 import splicingAPI from "@/api/SplicingAPI";
 
@@ -65,13 +69,13 @@ export async function clearGo() {
   }
 }
 
-export async function totalGo(): Promise<number> {
+export async function totalGo() {
   await new Promise((resolve) => setTimeout(resolve, 1000)); // 添加1秒延迟
 
   try {
     const response = await splicingAPI.requestSplicingTotal();
     console.log("总数", response);
-    return response.total; // 返回 total 属性值
+    return response;
   } catch (error) {
     console.error("获取总数失败:", error);
     ElMessage.error("获取总数失败");

@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-12 22:06:01
+ * @LastEditTime: 2024-11-12 22:44:27
 -->
 <script setup lang="ts">
 import { onMounted, onUnmounted, shallowRef, nextTick } from "vue";
@@ -353,7 +353,6 @@ const toggleAutoRefresh = () => {
 
 // 手动刷新
 const refresh = () => {
-  loading.value = true;
   initData();
 };
 
@@ -386,6 +385,7 @@ const saveScript = async () => {
     const data = {
       host_ip: shellRef.value.host_ip,
       task_type: shellRef.value.task_type,
+      script_type: shellRef.value.script_type,
       script_name: shellRef.value.script_name,
       script_content: content,
     };

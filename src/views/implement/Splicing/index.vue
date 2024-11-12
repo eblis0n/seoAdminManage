@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-06 16:22:59
+ * @LastEditTime: 2024-11-12 23:31:50
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -17,12 +17,12 @@ const pageSize = ref(10); // 每页显示的数据数量
 const listDatas = ref<any[]>([]);
 const platforOptions = ref<any[]>([]);
 
-const totalVal = ref<number>(0);
-
 const popBoxTit = ref("");
 
 const loading = ref(false);
 const dialogFormVisible = ref(false);
+
+const totalDatas = ref({});
 
 const infoRef = ref<any>({
   zyurl: "",
@@ -67,8 +67,8 @@ const initData = async () => {
       supportedPlatformsStore.fetchSupportedPlatforms(),
     ]);
     listDatas.value = listData;
-    totalVal.value = totalData;
-    console.log("totalVal.value", totalVal.value);
+    totalDatas.value = totalData;
+
     platforOptions.value = supportedPlatformsStore.supportedPlatforms;
   } catch (error) {
     console.error("获取数据失败", error);
@@ -90,6 +90,10 @@ const formatSort = (row: { sort: sort }): string => {
   return sortMap[row.sort] || "未知";
 };
 
+const refresh = () => {
+  initData();
+};
+
 const Add = () => {
   // console.log("新增", infoRef.value);
   popBoxTit.value = "新增";
@@ -102,20 +106,6 @@ const Publish = () => {
   dialogFormVisible.value = true;
 };
 
-const total = async () => {
-  loading.value = true;
-  try {
-    totalVal.value = await totalGo();
-    ElMessage.success("刷新成功");
-    console.log("totalVal.value", totalVal.value);
-  } catch (error) {
-    console.error("获取总数失败", error);
-    ElMessage.error("获取总数失败");
-  } finally {
-    resetInfo();
-    loading.value = false;
-  }
-};
 const Clear = async () => {
   loading.value = true;
   try {
@@ -212,11 +202,15 @@ const handleCurrentChange = (val: number) => {
   <div class="telegra-container" v-loading="loading">
     <el-card shadow="never">
       <el-row class="row-bg" :gutter="20">
-        <el-col :span="3">
+        <el-col :span="4">
+          <span>blogger 总:{{ totalDatas.blogger_total || 0 }} 条</span>
+        </el-col>
+        <el-col :span="4">
+          <span>telegra 总: {{ totalDatas.telegra_total || 0 }} 条</span>
+        </el-col>
+        <el-col :span="2">
           <div class="grid-content ep-bg-purple" />
-          <el-button type="primary" plain @click="total">
-            总数 {{ totalVal }} 条，刷新
-          </el-button>
+          <el-button type="primary" plain @click="refresh">手动刷新</el-button>
         </el-col>
         <el-col :span="2">
           <div class="grid-content ep-bg-purple" />

@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2023-10-17 21:21:36
- * @LastEditTime: 2024-10-28 20:23:27
+ * @LastEditTime: 2024-11-12 23:39:32
  */
 //统一管理PC客户端相关的接口
 import request from "@/utils/axios/request";
@@ -35,7 +35,7 @@ class splicingAPI {
     request.post<any, splicingResult[]>(API.SPLICING_PUSH, data);
 
   static requestSplicingTotal = () =>
-    request.get<void, splicingTotal>(API.SPLICING_TOTAL);
+    request.get<any, splicingTotal[]>(API.SPLICING_TOTAL);
 
   static requestSplicingDelete = () =>
     request.get<any, splicingResult[]>(API.SPLICING_DELETE_ALL);
