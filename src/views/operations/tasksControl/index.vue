@@ -2,10 +2,10 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-11 23:09:19
+ * @LastEditTime: 2024-11-12 16:48:46
 -->
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { onMounted, onUnmounted } from "vue";
 import { tasksList, tasksImplementLogs } from "../operationsJS";
 import type { taskResult, taskImplementLogs } from "@/types/operations";
 

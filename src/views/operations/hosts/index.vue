@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-11 21:59:32
+ * @LastEditTime: 2024-11-12 22:06:01
 -->
 <script setup lang="ts">
 import { onMounted, onUnmounted, shallowRef, nextTick } from "vue";
@@ -17,6 +17,10 @@ import JSONEditor from "jsoneditor";
 import "jsoneditor/dist/jsoneditor.css";
 
 import type { JSONEditorMode } from "jsoneditor";
+
+import { useScriptTemplateHook } from "@/store/modules/scriptTemplate";
+
+const scriptTemplateStore = useScriptTemplateHook();
 
 const currentPage = ref(1); // 当前页码
 const pageSize = ref(10); // 每页显示的数据数量
@@ -51,9 +55,30 @@ const shellRef = ref<any>({
   id: "",
   host_ip: "",
   task_type: "software",
+  script_type: "",
   script_name: "",
   script_content: {},
 });
+
+// 修改 scriptTemplate 的定义和处理
+const scriptTemplate = computed(() => {
+  return scriptTemplateStore.scriptTemplateList.map((item) => ({
+    label: item.script_name,
+    value: item.script_content,
+  }));
+});
+
+// 在 shellRef 的 watch 中添加模板内容的处理
+watch(
+  () => shellRef.value.script_type,
+  (newValue) => {
+    if (newValue && jsonEditorInstance) {
+      // 当选择模板时，更新编辑器内容
+      jsonEditorInstance.set(JSON.parse(newValue.replace(/'/g, '"')));
+      // shellRef.value.script_content = newValue;
+    }
+  }
+);
 
 const taskTypeOptions = [
   {
@@ -85,7 +110,7 @@ let jsonEditorInstance: JSONEditor | null = null;
 
 // 添加 JSONEditor 配置选项
 const jsonEditorOptions = {
-  mode: "tree" as JSONEditorMode,
+  mode: "code" as JSONEditorMode,
   modes: ["tree", "view", "form", "code", "text"] as JSONEditorMode[],
   onModeChange: function (newMode: JSONEditorMode, oldMode: JSONEditorMode) {
     console.log("Mode switched from", oldMode, "to", newMode);
@@ -130,7 +155,10 @@ onUnmounted(() => {
 const initData = async () => {
   loading.value = true;
   try {
-    const [listData] = await Promise.all([hostsList()]);
+    const [listData, _] = await Promise.all([
+      hostsList(),
+      scriptTemplateStore.fetchScriptTemplateList(),
+    ]);
     listDatas.value = listData;
   } catch (error) {
     console.error("获取数据失败", error);
@@ -367,6 +395,10 @@ const saveScript = async () => {
     console.log("准备保存的脚本内容:", content);
   } catch (error) {
     console.error("保存脚本失败:", error);
+  } finally {
+    loading.value = false;
+    handleCloseShell();
+    await initData();
   }
 };
 
@@ -395,7 +427,7 @@ const handleCurrentChange = (val: number) => {
 };
 </script>
 <template>
-  <div class="telegra-container" v-loading="loading">
+  <div class="container" v-loading="loading">
     <el-card shadow="never">
       <el-row class="row-bg" :gutter="20">
         <el-col :span="2">
@@ -621,9 +653,14 @@ const handleCurrentChange = (val: number) => {
               </el-form-item>
 
               <el-form-item class="form_item" label="选用模板">
-                <el-select placeholder="选用模板" size="large" style="width: 100%">
+                <el-select
+                  v-model="shellRef.script_type"
+                  placeholder="选用模板"
+                  size="large"
+                  style="width: 100%"
+                >
                   <el-option
-                    v-for="item in taskTypeOptions"
+                    v-for="item in scriptTemplate"
                     :key="item.value"
                     :label="item.label"
                     :value="item.value"
@@ -653,7 +690,7 @@ const handleCurrentChange = (val: number) => {
 </template>
 
 <style lang="scss" scoped>
-.telegra-container {
+.container {
   position: relative;
   padding: 24px;
 }

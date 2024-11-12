@@ -13,4 +13,6 @@ export * from "./modules/permission";
 export * from "./modules/settings";
 export * from "./modules/tagsView";
 export * from "./modules/user";
+export * from "./modules/public";
+export * from "./modules/scriptTemplate";
 export { store };
