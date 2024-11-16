@@ -31,7 +31,7 @@ function back() {
       <el-col :span="12">
         <h1 class="text-jumbo text-ginormous">Oops!</h1>
         gif来源
-        <a href="https://zh.airbnb.com/" target="_blank">airbnb</a>
+        <a href="https://www.taobao.com/" target="_blank">airbnb</a>
         页面
         <h2>你没有权限去该页面</h2>
         <h6>如有不满请联系你领导</h6>

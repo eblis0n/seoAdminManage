@@ -2,16 +2,19 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2023-10-17 21:21:36
- * @LastEditTime: 2024-10-29 00:28:33
+ * @LastEditTime: 2024-11-14 15:50:07
  */
 //统一管理PC客户端相关的接口
 import request from "@/utils/axios/request";
 
 //引入接口类型
 
-import type { splicingResult, splicingTotal } from "@/types/splicing.d.ts";
-
-import type { outcomeDel, outcomeParams } from "@/types/outcome";
+import type {
+  outcomeDel,
+  outcomeParams,
+  outcomeTotal,
+  outcomeResult,
+} from "@/types/outcome";
 
 enum API {
   OUTCOME_LIST = "/outcome/list/",
@@ -21,14 +24,14 @@ enum API {
 
 class outcomeAPI {
   static requesOutcomeList = (params: outcomeParams) =>
-    request.get<any, splicingResult[]>(API.OUTCOME_LIST, { params });
+    request.get<any, outcomeResult[]>(API.OUTCOME_LIST, { params });
 
   static requesOutcomTotal = (params: outcomeParams) =>
-    request.get<void, splicingTotal>(API.OUTCOME_TOTAL, { params });
+    request.get<void, outcomeTotal>(API.OUTCOME_TOTAL, { params });
 
   // 修改为 DELETE 方法
   static requesOutcomDeleteData = (datas: outcomeDel) =>
-    request.delete<any, splicingResult[]>(API.OUTCOME_DELETE_DATA, {
+    request.delete<any, outcomeResult[]>(API.OUTCOME_DELETE_DATA, {
       data: datas,
     });
 }

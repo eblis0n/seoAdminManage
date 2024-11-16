@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-09 19:39:35
+ * @LastEditTime: 2024-11-14 15:32:30
 -->
 
 <script setup lang="ts">
@@ -99,7 +99,7 @@ const handleCurrentChange = (val: number) => {
 </script>
 
 <template>
-  <div class="blogger-container" v-loading="loading">
+  <div class="web-container" v-loading="loading">
     <el-card shadow="never">
       <el-row class="row-bg">
         <el-col :span="3">
@@ -165,11 +165,6 @@ const handleCurrentChange = (val: number) => {
 </template>
 
 <style lang="scss" scoped>
-.blogger-container {
-  position: relative;
-  padding: 24px;
-}
-
 .el-row {
   margin-bottom: 20px;
 }

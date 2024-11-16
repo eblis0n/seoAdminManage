@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-12 22:44:27
+ * @LastEditTime: 2024-11-14 15:33:26
 -->
 <script setup lang="ts">
 import { onMounted, onUnmounted, shallowRef, nextTick } from "vue";
@@ -427,7 +427,7 @@ const handleCurrentChange = (val: number) => {
 };
 </script>
 <template>
-  <div class="container" v-loading="loading">
+  <div class="web-container" v-loading="loading">
     <el-card shadow="never">
       <el-row class="row-bg" :gutter="20">
         <el-col :span="2">
@@ -690,10 +690,6 @@ const handleCurrentChange = (val: number) => {
 </template>
 
 <style lang="scss" scoped>
-.container {
-  position: relative;
-  padding: 24px;
-}
 
 .el-row {
   margin-bottom: 20px;

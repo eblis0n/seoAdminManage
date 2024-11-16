@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="web-container">
     <div class="search-container">
       <el-form ref="queryFormRef" :model="queryParams" :inline="true">
         <el-form-item prop="keywords" label="关键字">

@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-03 13:48:48
+ * @LastEditTime: 2024-11-15 13:29:20
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -126,6 +126,9 @@ const delet = async (row: bloggerDel) => {
     resetInfo();
   }
 };
+const handleClose = () => {
+  resetInfo();
+};
 
 // 还原弹框输入
 const resetInfo = async () => {
@@ -151,7 +154,7 @@ const handleCurrentChange = (val: number) => {
 };
 </script>
 <template>
-  <div class="blogger-container" v-loading="loading">
+  <div class="web-container" v-loading="loading">
     <el-card shadow="never">
       <el-row class="row-bg">
         <el-col :span="1">
@@ -225,7 +228,8 @@ const handleCurrentChange = (val: number) => {
         destroy-on-close
         center
         :title="popBoxTit"
-        width="1400px"
+        width="80%"
+        @close="handleClose"
       >
         <el-form :model="infoRef">
           <el-row
@@ -293,11 +297,6 @@ const handleCurrentChange = (val: number) => {
 </template>
 
 <style lang="scss" scoped>
-.blogger-container {
-  position: relative;
-  padding: 24px;
-}
-
 .el-row {
   margin-bottom: 20px;
 }
@@ -331,4 +330,3 @@ const handleCurrentChange = (val: number) => {
   width: 300px;
 }
 </style>
-./PCclientJS

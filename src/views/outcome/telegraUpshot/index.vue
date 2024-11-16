@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-10 15:15:28
+ * @LastEditTime: 2024-11-14 15:32:19
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -101,7 +101,7 @@ const handleCurrentChange = (val: number) => {
 </script>
 
 <template>
-  <div class="telegra-container" v-loading="loading">
+  <div class="web-container" v-loading="loading">
     <el-card shadow="never">
       <el-row class="row-bg">
         <el-col :span="3">
@@ -167,11 +167,6 @@ const handleCurrentChange = (val: number) => {
 </template>
 
 <style lang="scss" scoped>
-.telegra-container {
-  position: relative;
-  padding: 24px;
-}
-
 .el-row {
   margin-bottom: 20px;
 }
