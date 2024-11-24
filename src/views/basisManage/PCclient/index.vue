@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-14 15:22:29
+ * @LastEditTime: 2024-11-23 16:06:14
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -10,6 +10,7 @@ import type { pcDel, pcUpdate } from "@/types/pc.d.ts";
 import { pclist, updateGo, delGo, addGo } from "./PCclientJS";
 
 import { useSupportedPlatformsHook } from "@/store/modules/public";
+import { formatGroup } from "@/utils/Formatter/index";
 const supportedPlatformsStore = useSupportedPlatformsHook();
 
 const currentPage = ref(1); // 当前页码
@@ -36,15 +37,6 @@ const infoRef = ref<any>({
   remark: "",
 });
 
-// 定义一个类型来表示可能的 genre 值
-type Group = "0" | "1";
-
-// 定义 genreMap 的类型
-const groupMap: Record<Group, string> = {
-  "0": "本地",
-  "1": "服务器",
-};
-
 // 接口相关
 const initData = async () => {
   loading.value = true;
@@ -66,10 +58,6 @@ const initData = async () => {
 onMounted(() => {
   initData();
 });
-
-const formatGroup = (row: { group: Group }): string => {
-  return groupMap[row.group] || "未知";
-};
 
 // // 添加
 const Add = () => {
@@ -97,7 +85,7 @@ const revise = (row: pcUpdate) => {
   dialogFormVisible.value = true;
 };
 
-const Cancel = () => {
+const handleClose = () => {
   resetInfo();
 };
 
@@ -256,7 +244,8 @@ const handleCurrentChange = (val: number) => {
         destroy-on-close
         center
         :title="popBoxTit"
-        width="1400px"
+        width="80%"
+        @close="handleClose"
       >
         <el-form :model="infoRef">
           <el-row
@@ -357,7 +346,7 @@ const handleCurrentChange = (val: number) => {
         </el-form>
         <template #footer>
           <span class="dialog-footer">
-            <el-button @click="Cancel">取消</el-button>
+            <el-button @click="handleClose">取消</el-button>
             <el-button type="primary" @click="save">保存</el-button>
           </span>
         </template>
@@ -400,4 +389,3 @@ const handleCurrentChange = (val: number) => {
   width: 300px;
 }
 </style>
-./PCclientJS

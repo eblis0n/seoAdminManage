@@ -2,13 +2,13 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-15 17:20:40
+ * @LastEditTime: 2024-11-23 20:16:14
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { splicingList, addGo, publishGo, clearGo, totalGo } from "./splicingJS";
 import { useSupportedPlatformsHook } from "@/store/modules/public";
-
+import { formatGenre, formatSort } from "@/utils/Formatter/index";
 const supportedPlatformsStore = useSupportedPlatformsHook();
 
 const currentPage = ref(1); // 当前页码
@@ -22,7 +22,11 @@ const popBoxTit = ref("");
 const loading = ref(false);
 const dialogFormVisible = ref(false);
 
-const totalDatas = ref({});
+const totalDatas = ref({
+  blogger_total: 0,
+  telegra_total: 0,
+  note_total: 0,
+});
 
 const infoRef = ref<any>({
   zyurl: "",
@@ -38,24 +42,6 @@ const infoRef = ref<any>({
   isarts: "1",
   group: "all",
 });
-
-// 定义一个类型来表示可能的 genre 值
-type Genre = "0" | "1" | "2";
-
-// 定义 genreMap 的类型
-const genreMap: Record<Genre, string> = {
-  "0": "重定向",
-  "1": "镜像",
-  "2": "留痕",
-};
-
-type sort = "0" | "1";
-
-// 定义 genreMap 的类型
-const sortMap: Record<sort, string> = {
-  "0": "拼接",
-  "1": "不拼接",
-};
 
 // 接口相关
 const initData = async () => {
@@ -81,14 +67,6 @@ const initData = async () => {
 onMounted(() => {
   initData();
 });
-
-const formatGenre = (row: { genre: Genre }): string => {
-  return genreMap[row.genre] || "未知";
-};
-
-const formatSort = (row: { sort: sort }): string => {
-  return sortMap[row.sort] || "未知";
-};
 
 const refresh = () => {
   initData();
@@ -208,6 +186,11 @@ const handleCurrentChange = (val: number) => {
         <el-col :span="4">
           <span>telegra 总: {{ totalDatas.telegra_total || 0 }} 条</span>
         </el-col>
+        <el-col :span="4">
+          <span>note 总: {{ totalDatas.note_total || 0 }} 条</span>
+        </el-col>
+      </el-row>
+      <el-row class="row-bg">
         <el-col :span="2">
           <div class="grid-content ep-bg-purple" />
           <el-button type="primary" plain @click="refresh">手动刷新</el-button>
@@ -457,7 +440,7 @@ const handleCurrentChange = (val: number) => {
               <el-form-item
                 label="分组"
                 class="form_item"
-                v-if="popBoxTit === '发布' && infoRef.platform === 'blogger'"
+                v-if="popBoxTit === '发布' && infoRef.platform !== 'telegra'"
               >
                 <el-input v-model="infoRef.group" autocomplete="off" />
               </el-form-item>

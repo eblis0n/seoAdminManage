@@ -1,3 +1,9 @@
+/*
+ * @version: 1.0.0
+ * @Author: Eblis
+ * @Date: 2024-11-12 22:17:11
+ * @LastEditTime: 2024-11-22 19:57:02
+ */
 import type { App } from "vue";
 import { createPinia } from "pinia";
 
@@ -15,4 +21,7 @@ export * from "./modules/tagsView";
 export * from "./modules/user";
 export * from "./modules/public";
 export * from "./modules/scriptTemplate";
+export * from "./modules/aiPrompt";
+export * from "./modules/category";
+
 export { store };

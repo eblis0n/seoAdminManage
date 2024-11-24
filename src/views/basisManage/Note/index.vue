@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-16 14:03:44
+ * @LastEditTime: 2024-11-23 16:02:34
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -40,7 +40,7 @@ const infoRef = ref<any>({
   username: "",
   email: "",
   password: "",
-  proxies: "",
+  proxies: "127.0.0.1:1234",
   useragent: "",
   cookie: "",
 });
@@ -207,7 +207,7 @@ const resetInfo = async () => {
     username: "",
     email: "",
     password: "",
-    proxies: "",
+    proxies: "127.0.0.1:1234",
     useragent: "",
     cookie: "",
   };
@@ -390,7 +390,7 @@ const handleCurrentChange = (val: number) => {
                   style="width: 225px"
                   :rows="3"
                   type="textarea"
-                  placeholder="xxxxx:xxxx"
+                  placeholder="127.0.0.1:1234"
                   autocomplete="off"
                 />
               </el-form-item>

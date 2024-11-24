@@ -2,17 +2,22 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-23 16:00:51
+ * @LastEditTime: 2024-11-23 00:07:43
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import type { bloggerDel, bloggerUpdate } from "@/types/blogger.d.ts";
-import { bloggerList, updateGo, delGo, addGo } from "./bloggerJS";
+import type { categoryDel, categoryUpdate } from "@/types/category";
+import { updateGo, delGo, addGo } from "./categoryJS";
+
+import { useCategoryformsHook } from "@/store/modules/category";
+
+const categoryFormsStore = useCategoryformsHook();
 
 const currentPage = ref(1); // 当前页码
 const pageSize = ref(10); // 每页显示的数据数量
 
 const listDatas = ref<any[]>([]);
+const parentOptions = ref<any[]>([]);
 
 // 初始化
 const popBoxTit = ref("");
@@ -22,19 +27,17 @@ const dialogFormVisible = ref(false);
 
 const infoRef = ref<any>({
   id: "",
-  group: "",
-  adsNumber: "",
-  adsID: "",
-  proxy: "127.0.0.1:1234",
-  bloggerID: "",
+  name: "",
+  level: "0",
 });
 
 // 接口相关
 const initData = async () => {
   loading.value = true;
   try {
-    const [listData] = await Promise.all([bloggerList()]);
-    listDatas.value = listData;
+    const [_] = await Promise.all([categoryFormsStore.fetchCategoryforms()]);
+    listDatas.value = categoryFormsStore.categoryforms;
+    parentOptions.value = listDatas.value.filter((item) => item.level === 0);
   } catch (error) {
     console.error("获取数据失败", error);
     ElMessage.error("获取数据失败");
@@ -55,23 +58,15 @@ const Add = () => {
 };
 
 // // 修改
-const revise = (row: bloggerUpdate) => {
-  // console.log(parent);
+const revise = (row: categoryUpdate) => {
   const data = {
     id: row.id,
-    adsID: row.adsID,
-    adsNumber: row.adsNumber,
-    group: row.group,
-    proxy: row.proxy,
-    bloggerID: row.bloggerID,
+    name: row.name,
+    level: row.level,
   };
   infoRef.value = data;
   popBoxTit.value = "修改";
   dialogFormVisible.value = true;
-};
-
-const Cancel = () => {
-  resetInfo();
 };
 
 const save = async () => {
@@ -85,21 +80,15 @@ const save = async () => {
     if (popBoxTit.value === "修改") {
       const data = {
         id: infoRef.value.id,
-        adsID: infoRef.value.adsID,
-        adsNumber: infoRef.value.adsNumber,
-        group: infoRef.value.group,
-        proxy: infoRef.value.proxy,
-        bloggerID: infoRef.value.bloggerID,
+        name: infoRef.value.name,
+        level: Number(infoRef.value.level),
       };
       await updateGo(data);
     } else {
       //  新增
       const data = {
-        adsID: infoRef.value.adsID,
-        adsNumber: infoRef.value.adsNumber,
-        group: infoRef.value.group,
-        proxy: infoRef.value.proxy,
-        bloggerID: infoRef.value.bloggerID,
+        name: infoRef.value.name,
+        level: Number(infoRef.value.level),
       };
       await addGo(data);
     }
@@ -112,7 +101,7 @@ const save = async () => {
 };
 
 // // 删除
-const delet = async (row: bloggerDel) => {
+const delet = async (row: categoryDel) => {
   loading.value = true;
   try {
     const data = {
@@ -136,12 +125,10 @@ const resetInfo = async () => {
   popBoxTit.value = "";
   infoRef.value = {
     id: "",
-    group: "",
-    adsNumber: "",
-    adsID: "",
-    proxy: "127.0.0.1:1234",
-    bloggerID: "",
+    name: "",
+    level: "0",
   };
+
   dialogFormVisible.value = false;
   await initData();
 };
@@ -151,6 +138,11 @@ const handleSizeChange = (val: number) => {
 };
 const handleCurrentChange = (val: number) => {
   console.log(`current page: ${val}`);
+};
+
+// 添加一个检查是否有子分类的方法
+const hasChildren = (id: string | number) => {
+  return listDatas.value.some((item) => item.level === id);
 };
 </script>
 <template>
@@ -176,20 +168,9 @@ const handleCurrentChange = (val: number) => {
               "
             >
               <el-table-column prop="id" label="ID" align="center" />
-              <el-table-column prop="group" label="分组" align="center" />
 
-              <el-table-column
-                prop="adsNumber"
-                label="ads编号"
-                align="center"
-              />
-              <el-table-column prop="adsID" label="ads ID" align="center" />
-              <el-table-column prop="proxy" label="代理" align="center" />
-              <el-table-column
-                prop="bloggerID"
-                label="bloggerID"
-                align="center"
-              />
+              <el-table-column prop="name" label="名称" align="center" />
+              <el-table-column prop="level" label="父级" align="center" />
               <el-table-column
                 prop="create_at"
                 label="添加时间"
@@ -200,7 +181,12 @@ const handleCurrentChange = (val: number) => {
                   <el-button type="primary" link @click="revise(row)">
                     修改
                   </el-button>
-                  <el-button type="primary" link @click="delet(row)">
+                  <el-button
+                    type="primary"
+                    link
+                    @click="delet(row)"
+                    v-if="!hasChildren(row.id)"
+                  >
                     删除
                   </el-button>
                 </template>
@@ -223,6 +209,7 @@ const handleCurrentChange = (val: number) => {
       </el-row>
 
       <!-- 弹框 -->
+
       <el-dialog
         v-model="dialogFormVisible"
         destroy-on-close
@@ -238,60 +225,47 @@ const handleCurrentChange = (val: number) => {
             v-show="popBoxTit === '修改'"
           >
             <el-col :span="4">
-              <el-form-item
-                v-if="popBoxTit === '修改'"
-                label="id"
-                class="form_item"
-              >
+              <el-form-item label="id" class="form_item">
                 <span>{{ infoRef.id }}</span>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row class="row-bg flex items-center" :gutter="20">
             <el-col :span="8">
-              <el-form-item label="分组" class="form_item">
-                <el-input v-model="infoRef.group" autocomplete="off" />
+              <el-form-item label="名称" class="form_item">
+                <el-input v-model="infoRef.name" autocomplete="off" />
               </el-form-item>
             </el-col>
             <el-col :span="8">
-              <el-form-item label="ads编号" class="form_item">
-                <el-input v-model="infoRef.adsNumber" autocomplete="off" />
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="adsID" class="form_item">
-                <el-input v-model="infoRef.adsID" autocomplete="off" />
-              </el-form-item>
-            </el-col>
-          </el-row>
-
-          <el-row class="row-bg flex items-center" :gutter="20">
-            <el-col :span="8">
-              <el-form-item label="代理" class="form_item">
-                <el-input
-                  v-model="infoRef.proxy"
-                  style="width: 225px"
-                  :rows="3"
-                  type="textarea"
-                  placeholder="127.0.0.1:1234"
-                  autocomplete="off"
-                />
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="bloggerID" class="form_item">
-                <el-input v-model="infoRef.bloggerID" autocomplete="off" />
+              <el-form-item
+                label="父级"
+                class="form_item"
+                v-show="!hasChildren(infoRef.id)"
+              >
+                <el-select
+                  v-model="infoRef.level"
+                  placeholder="Select"
+                  style="width: 240px"
+                >
+                  <el-option
+                    v-for="item in parentOptions"
+                    :key="item.value"
+                    :label="item.name"
+                    :value="item.id"
+                  />
+                </el-select>
               </el-form-item>
             </el-col>
           </el-row>
         </el-form>
         <template #footer>
           <span class="dialog-footer">
-            <el-button @click="Cancel">取消</el-button>
+            <el-button @click="handleClose">取消</el-button>
             <el-button type="primary" @click="save">保存</el-button>
           </span>
         </template>
       </el-dialog>
+      <!-- 弹框 end-->
     </el-card>
   </div>
 </template>
@@ -326,7 +300,65 @@ const handleCurrentChange = (val: number) => {
   width: 300px;
 }
 
-.form_item {
-  width: 300px;
+.prompt-list {
+  // display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 80%;
+  padding: 10px;
+  margin-left: 15px;
+  border: 1px dashed #dcdfe6;
+}
+
+.prompt-input-container {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  margin-bottom: 10px;
+
+  .el-input {
+    flex: 1;
+  }
+
+  .prompt-actions {
+    display: flex;
+    align-items: center;
+    min-width: 40px;
+    margin-left: 10px;
+
+    .el-button {
+      padding: 8px;
+    }
+  }
+}
+
+.shell-content-container {
+  display: flex;
+  gap: 20px;
+  min-height: 600px;
+}
+
+.left-form {
+  width: 40%;
+  padding: 20px;
+  margin-right: 20px;
+  background-color: #f7f5f5;
+  border-radius: 4px;
+
+  .form_item {
+    margin-bottom: 20px;
+
+    :deep(.el-form-item__label) {
+      padding-bottom: 8px;
+      font-weight: bold;
+    }
+  }
+}
+
+.right-editor {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 50%;
 }
 </style>

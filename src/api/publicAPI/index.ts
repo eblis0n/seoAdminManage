@@ -6,14 +6,17 @@
  */
 //统一管理域名相关的接口
 import request from "@/utils/axios/request";
-import type { platformsParams } from "@/types/other";
+import type { platformsParams, googleExcelParams } from "@/types/other";
 
 enum API {
   SUPPORTED_PLATFORMS = "/public/platforms/",
+  GOOGLE_EXCEL = "/public/excle/",
 }
 class PublicAPI {
   static requestSupportedPlatforms = () =>
     request.get<any, platformsParams[]>(API.SUPPORTED_PLATFORMS);
+  static requestGoogleExcel = () =>
+    request.get<any, googleExcelParams[]>(API.GOOGLE_EXCEL);
 }
 
 export default PublicAPI;

@@ -1,6 +1,12 @@
 <!--
  * @version: 1.0.0
  * @Author: Eblis
+ * @Date: 2024-11-12 22:17:11
+ * @LastEditTime: 2024-11-23 15:46:48
+-->
+<!--
+ * @version: 1.0.0
+ * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
  * @LastEditTime: 2024-11-14 15:32:30
 -->
@@ -9,23 +15,13 @@
 import { ref, onMounted } from "vue";
 import { ElMessage } from "element-plus";
 import { upshotList, totalGo, exportToExcelWrapper } from "../upshotJS";
-
+import { formatGenre } from "@/utils/Formatter/index";
 const currentPage = ref(1); // 当前页码
 const pageSize = ref(10); // 每页显示的数据数量
 const totalVal = ref<number>(0);
 const listDatas = ref<any[]>([]);
 
 const loading = ref(false);
-
-// 定义一个类型来表示可能的 genre 值
-type Genre = "0" | "1" | "2";
-
-// 定义 genreMap 的类型
-const genreMap: Record<Genre, string> = {
-  "0": "重定向",
-  "1": "镜像",
-  "2": "留痕",
-};
 
 // 接口相关
 const initData = async () => {
@@ -48,10 +44,6 @@ const initData = async () => {
 onMounted(() => {
   initData();
 });
-
-const formatGenre = (row: { genre: Genre }): string => {
-  return genreMap[row.genre] || "未知";
-};
 
 const total = async () => {
   loading.value = true;

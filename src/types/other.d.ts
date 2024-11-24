@@ -23,3 +23,7 @@ export interface amazonsqsResult {
 export interface amazonsqsDel {
   url: string;
 }
+
+export interface googleExcelParams {
+  url: string;
+}

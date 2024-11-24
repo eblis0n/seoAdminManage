@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-14 15:33:26
+ * @LastEditTime: 2024-11-23 15:56:58
 -->
 <script setup lang="ts">
 import { onMounted, onUnmounted, shallowRef, nextTick } from "vue";
@@ -12,6 +12,8 @@ import type {
   postTaskInsert,
   hostsResult,
 } from "@/types/operations";
+
+import { formatdisabledMap, formatOnline } from "@/utils/Formatter/index";
 
 import JSONEditor from "jsoneditor";
 import "jsoneditor/dist/jsoneditor.css";
@@ -91,19 +93,6 @@ const taskTypeOptions = [
   },
 ];
 
-type online = "0" | "1";
-const onlineMap: Record<online, string> = {
-  "0": "在线",
-  "1": "离线",
-};
-
-type is_disabled = "0" | "1";
-
-const disabledMap: Record<is_disabled, string> = {
-  "0": "上架",
-  "1": "下架",
-};
-
 // 添加 JSONEditor 相关的 ref
 const jsonEditorContainer = ref<HTMLElement | null>(null);
 let jsonEditorInstance: JSONEditor | null = null;
@@ -176,14 +165,6 @@ onMounted(() => {
 onUnmounted(() => {
   closeWebSocket();
 });
-
-const formatOnline = (row: { online: online }): string => {
-  return onlineMap[row.online] || "未知";
-};
-
-const formatdisabledMap = (row: { is_disabled: is_disabled }): string => {
-  return disabledMap[row.is_disabled] || "未知";
-};
 
 const disable = async (row: hostDisable) => {
   loading.value = true;
@@ -690,7 +671,6 @@ const handleCurrentChange = (val: number) => {
 </template>
 
 <style lang="scss" scoped>
-
 .el-row {
   margin-bottom: 20px;
 }
