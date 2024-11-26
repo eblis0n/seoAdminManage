@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-23 16:06:14
+ * @LastEditTime: 2024-11-26 22:42:33
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -317,6 +317,7 @@ const handleCurrentChange = (val: number) => {
                     v-model="infoRef.platform"
                     placeholder="用途"
                     size="large"
+                    multiple
                     style="width: 240px"
                   >
                     <el-option
