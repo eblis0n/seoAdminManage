@@ -2,11 +2,12 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-23 20:16:14
+ * @LastEditTime: 2024-11-26 14:37:57
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { splicingList, addGo, publishGo, clearGo, totalGo } from "./splicingJS";
+import type { splicingTotal } from "@/types/splicing.d.ts";
 import { useSupportedPlatformsHook } from "@/store/modules/public";
 import { formatGenre, formatSort } from "@/utils/Formatter/index";
 const supportedPlatformsStore = useSupportedPlatformsHook();
@@ -22,11 +23,8 @@ const popBoxTit = ref("");
 const loading = ref(false);
 const dialogFormVisible = ref(false);
 
-const totalDatas = ref({
-  blogger_total: 0,
-  telegra_total: 0,
-  note_total: 0,
-});
+// 使用明确类型
+const totalDatas = ref<any[]>([]);
 
 const infoRef = ref<any>({
   zyurl: "",
@@ -53,7 +51,16 @@ const initData = async () => {
       supportedPlatformsStore.fetchSupportedPlatforms(),
     ]);
     listDatas.value = listData;
-    totalDatas.value = totalData;
+
+    console.log("totalData", totalData);
+    // 转换为数组格式
+    const convertedData: splicingTotal[] = Object.entries(totalData).map(
+      ([key, value]) => ({
+        platform: key.replace("_total", ""),
+        total: value,
+      })
+    );
+    totalDatas.value = convertedData;
 
     platforOptions.value = supportedPlatformsStore.supportedPlatforms;
   } catch (error) {
@@ -181,13 +188,31 @@ const handleCurrentChange = (val: number) => {
     <el-card shadow="never">
       <el-row class="row-bg" :gutter="20">
         <el-col :span="4">
-          <span>blogger 总:{{ totalDatas.blogger_total || 0 }} 条</span>
+          <span>
+            blogger 总:
+            {{
+              totalDatas.find((item) => item.platform === "blogger")?.total || 0
+            }}
+            条
+          </span>
         </el-col>
         <el-col :span="4">
-          <span>telegra 总: {{ totalDatas.telegra_total || 0 }} 条</span>
+          <span>
+            telegra 总:
+            {{
+              totalDatas.find((item) => item.platform === "telegra")?.total || 0
+            }}
+            条
+          </span>
         </el-col>
         <el-col :span="4">
-          <span>note 总: {{ totalDatas.note_total || 0 }} 条</span>
+          <span>
+            note 总:
+            {{
+              totalDatas.find((item) => item.platform === "note")?.total || 0
+            }}
+            条
+          </span>
         </el-col>
       </el-row>
       <el-row class="row-bg">
@@ -298,7 +323,7 @@ const handleCurrentChange = (val: number) => {
                 </div>
               </el-form-item>
             </el-col>
-            <el-col :span="6">
+            <el-col :span="8">
               <el-form-item class="form_item flex items-center" label="类型">
                 <div class="flex items-center">
                   <el-radio-group
@@ -312,9 +337,7 @@ const handleCurrentChange = (val: number) => {
                 </div>
               </el-form-item>
             </el-col>
-          </el-row>
-          <el-row class="row-bg" :gutter="20">
-            <el-col :span="4">
+            <el-col :span="8">
               <el-form-item class="form_item flex items-center" label="分类">
                 <div class="flex items-center">
                   <el-radio-group
@@ -327,6 +350,8 @@ const handleCurrentChange = (val: number) => {
                 </div>
               </el-form-item>
             </el-col>
+          </el-row>
+          <el-row class="row-bg" :gutter="20">
             <el-col :span="6">
               <el-form-item
                 class="form_item flex items-center"

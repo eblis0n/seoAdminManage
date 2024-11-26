@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-23 16:47:34
+ * @LastEditTime: 2024-11-25 00:37:27
 -->
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
@@ -45,6 +45,7 @@ const infoRef = ref<any>({
   ATag: "",
   link: "",
   language: "",
+  spoken: "",
 });
 
 const typeData = [
@@ -185,6 +186,7 @@ const save = async () => {
         source: infoRef.value.source,
         title: infoRef.value.title,
         content: infoRef.value.content,
+        spoken: infoRef.value.spoken,
         type: infoRef.value.type,
         user: infoRef.value.user,
         commission: infoRef.value.commission,
@@ -208,6 +210,7 @@ const look = (row: articleResult) => {
     source: row.source,
     title: row.title,
     content: row.content,
+    spoken: row.spoken,
     type: row.type,
     user: row.user,
     commission: String(row.commission),
@@ -257,6 +260,7 @@ const resetInfo = async () => {
     ATag: "",
     link: "",
     language: "",
+    spoken: "",
   };
 
   dialogFormVisible.value = false;
@@ -325,6 +329,7 @@ const getPromptName = (promptID: string | number) => {
               <el-table-column prop="source" label="来源" align="center" />
               <el-table-column prop="title" label="标题" align="center" />
               <el-table-column prop="type" label="文章类型" align="center" />
+              <el-table-column prop="spoken" label="语言" align="center" />
               <el-table-column prop="user" label="用户" align="center" />
               <el-table-column
                 prop="commission"
@@ -402,6 +407,14 @@ const getPromptName = (promptID: string | number) => {
               <el-form-item label="来源" class="form_item">
                 <el-input v-model="infoRef.source" autocomplete="off" />
               </el-form-item>
+              <el-form-item
+                label="语言"
+                class="form_item"
+                v-show="infoRef.isAI === '1'"
+              >
+                <el-input v-model="infoRef.spoken" autocomplete="off" />
+              </el-form-item>
+
               <el-form-item label="文章类型" class="form_item">
                 <!-- <el-input v-model="infoRef.type" autocomplete="off" /> -->
                 <el-select
@@ -462,10 +475,7 @@ const getPromptName = (promptID: string | number) => {
 
           <!-- 右侧编辑器 -->
           <div class="right-editor">
-            <el-form
-              :model="infoRef"
-              v-show="infoRef.isAI === '1' && popBoxTit === '查看'"
-            >
+            <el-form :model="infoRef" v-show="infoRef.isAI === '1'">
               <el-form-item label="正文" class="form_item">
                 <el-input
                   v-model="infoRef.content"
@@ -540,7 +550,7 @@ const getPromptName = (promptID: string | number) => {
           </span>
         </template>
       </el-dialog>
-      <!-- 非ai end-->
+      <!--  end-->
     </el-card>
   </div>
 </template>
