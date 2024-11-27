@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-27 01:56:28
+ * @LastEditTime: 2024-11-27 02:19:18
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -68,7 +68,7 @@ const Add = () => {
 
 // 修改
 const revise = (row: pcUpdate) => {
-  // console.log(parent);
+  console.log("infoRef.platform", typeof row.platform, row.platform);
 
   const data = {
     id: row.id,
@@ -77,7 +77,10 @@ const revise = (row: pcUpdate) => {
     address: row.address,
     account: row.account,
     password: row.password,
-    platform: Array.isArray(row.platform) ? row.platform : [],
+    platform:
+      typeof row.platform === "string"
+        ? JSON.parse(row.platform)
+        : row.platform,
     state: row.state.toString(),
     remark: row.remark,
   };
