@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-23 15:48:32
+ * @LastEditTime: 2024-11-28 19:51:30
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -116,7 +116,12 @@ const handleCurrentChange = (val: number) => {
               "
             >
               <el-table-column prop="id" label="ID" align="center" />
-              <el-table-column prop="url" label="url" align="center" />
+              <el-table-column
+                prop="url"
+                label="url"
+                align="center"
+                width="200"
+              />
               <el-table-column
                 prop="platform"
                 label="投放平台"
