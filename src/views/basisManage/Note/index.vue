@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-23 16:02:34
+ * @LastEditTime: 2024-11-28 21:31:16
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -34,7 +34,7 @@ const dialogFormVisible = ref(false);
 const infoRef = ref<any>({
   id: "",
   type: "basis",
-  group: "",
+  group: "all",
   adsNumber: "",
   adsID: "",
   username: "",
@@ -201,7 +201,7 @@ const resetInfo = async () => {
   infoRef.value = {
     id: "",
     type: "basis",
-    group: "",
+    group: "all",
     adsNumber: "",
     adsID: "",
     username: "",
