@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-25 00:37:27
+ * @LastEditTime: 2024-11-28 16:20:04
 -->
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
@@ -116,6 +116,7 @@ const selectedPronoun = computed(() => {
   const selected = promptDatas.value.find(
     (item) => String(item.id) === String(selectedPromptID.value)
   );
+
   return selected ? selected.pronoun : "";
 });
 
@@ -131,6 +132,8 @@ const inputFields = computed(() => {
 const inputValues = ref<{ [key: string]: string }>({});
 
 const updateInputFields = () => {
+  // 将 selectedPromptID 赋值给 infoRef.promptID
+  infoRef.value.promptID = selectedPromptID.value;
   // 更新 `inputValues` 的数据，重置旧的字段值
   inputValues.value = {};
 };
@@ -176,12 +179,12 @@ const save = async () => {
         link: infoRef.value.tylinkpe,
         language: infoRef.value.language,
       };
+      console.log("data", data);
 
       await aiAddGo(data);
     } else {
       const data = {
         isAI: infoRef.value.isAI,
-        promptID: infoRef.value.promptID,
         sortID: infoRef.value.sortID,
         source: infoRef.value.source,
         title: infoRef.value.title,
@@ -262,6 +265,7 @@ const resetInfo = async () => {
     language: "",
     spoken: "",
   };
+  selectedPromptID.value = "";
 
   dialogFormVisible.value = false;
   await initData();
@@ -386,7 +390,7 @@ const getPromptName = (promptID: string | number) => {
               <el-form-item
                 label="id"
                 class="form_item"
-                v-if="popBoxTit === '查看'"
+                v-show="popBoxTit === '查看'"
               >
                 <span>{{ infoRef.id }}</span>
               </el-form-item>
@@ -401,7 +405,11 @@ const getPromptName = (promptID: string | number) => {
                   </el-radio-group>
                 </div>
               </el-form-item>
-              <el-form-item label="标题" class="form_item">
+              <el-form-item
+                label="标题"
+                class="form_item"
+                v-show="popBoxTit === '查看'"
+              >
                 <el-input v-model="infoRef.title" autocomplete="off" />
               </el-form-item>
               <el-form-item label="来源" class="form_item">
