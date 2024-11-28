@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-28 16:20:04
+ * @LastEditTime: 2024-11-28 20:34:12
 -->
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
@@ -48,6 +48,16 @@ const infoRef = ref<any>({
   spoken: "",
 });
 
+const sourceData = [
+  {
+    value: "openAI",
+    label: "openAI",
+  },
+  {
+    value: "OllamaAI",
+    label: "OllamaAI",
+  },
+];
 const typeData = [
   {
     value: "Markdown",
@@ -413,7 +423,26 @@ const getPromptName = (promptID: string | number) => {
                 <el-input v-model="infoRef.title" autocomplete="off" />
               </el-form-item>
               <el-form-item label="来源" class="form_item">
-                <el-input v-model="infoRef.source" autocomplete="off" />
+                <!-- 当 infoRef.isAI === "1" 时，显示输入框 -->
+                <el-input
+                  v-if="infoRef.isAI === '1'"
+                  v-model="infoRef.source"
+                  autocomplete="off"
+                />
+                <!-- 当 infoRef.isAI === "0" 时，显示下拉框 -->
+                <el-select
+                  v-else
+                  v-model="infoRef.source"
+                  placeholder="Select"
+                  style="width: 240px"
+                >
+                  <el-option
+                    v-for="item in sourceData"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
+                </el-select>
               </el-form-item>
               <el-form-item
                 label="语言"
@@ -424,7 +453,6 @@ const getPromptName = (promptID: string | number) => {
               </el-form-item>
 
               <el-form-item label="文章类型" class="form_item">
-                <!-- <el-input v-model="infoRef.type" autocomplete="off" /> -->
                 <el-select
                   v-model="infoRef.type"
                   placeholder="Select"
