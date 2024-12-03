@@ -2,17 +2,12 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-25 16:45:35
+ * @LastEditTime: 2024-12-03 17:13:36
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import {
-  splicingList,
-  addGo,
-  publishGo,
-  clearGo,
-  totalGo,
-} from "./postArticleJS";
+import { postInSqlGo } from "./postArticleJS";
+import { articleType } from "@/utils/constants";
 import { useCategoryformsHook } from "@/store/modules/category";
 import { useSupportedPlatformsHook } from "@/store/modules/public";
 const supportedPlatformsStore = useSupportedPlatformsHook();
@@ -26,10 +21,12 @@ const dialogFormVisible = ref(false);
 const platforOptions = ref<any[]>([]);
 
 const sortgo = ref<any[]>([]);
+
 const infoRef = ref<any>({
   post_max: "300",
   group: "all",
   platform: "",
+  isSecondary: "1",
 });
 
 const articleRef = ref<any>({
@@ -40,21 +37,6 @@ const articleRef = ref<any>({
   user: "",
   spoken: "",
 });
-
-const typeData = [
-  {
-    value: "Markdown",
-    label: "Markdown",
-  },
-  {
-    value: "Html",
-    label: "Html",
-  },
-  {
-    value: "Text",
-    label: "Text",
-  },
-];
 
 // 接口相关
 const initData = async () => {
@@ -120,6 +102,34 @@ const handleClose = () => {
   resetInfo();
 };
 
+const prefabricationGO = () => {
+  console.log("准提交数据：", infoRef.value, articleRef.value);
+  console.log("当前提交行为:", popBoxTit.value);
+
+  dialogFormVisible.value = false;
+  loading.value = true;
+  try {
+    const data = {
+      post_max: infoRef.value.post_max,
+      group: infoRef.value.group,
+      platform: infoRef.value.platform,
+      isSecondary: infoRef.value.isSecondary,
+      isAI: articleRef.value.isAI,
+      sortID: articleRef.value.sortID,
+      type: articleRef.value.type,
+      commission: articleRef.value.commission,
+      user: articleRef.value.user,
+      spoken: articleRef.value.spoken,
+    };
+    postInSqlGo(data);
+  } catch (error) {
+    console.log("出现异常:", error);
+  } finally {
+    loading.value = false;
+    resetInfo();
+  }
+};
+
 // 还原弹框输入
 const resetInfo = async () => {
   // 还原初始化
@@ -128,6 +138,13 @@ const resetInfo = async () => {
   dialogFormVisible.value = false;
 
   infoRef.value = {
+    post_max: "",
+    group: "",
+    platform: "",
+    isSecondary: "1",
+  };
+
+  articleRef.value = {
     isAI: "0",
     sortID: "",
     type: "",
@@ -213,7 +230,18 @@ const handleSortChange = (value: string | number) => {
                 class="form_item"
                 v-show="infoRef.platform === 'telegra'"
               >
-                <el-input v-model="infoRef.max" autocomplete="off" />
+                <el-input v-model="infoRef.post_max" autocomplete="off" />
+              </el-form-item>
+              <el-form-item label="是否二次AI" class="form_item">
+                <div class="flex items-center">
+                  <el-radio-group
+                    v-model="infoRef.isSecondary"
+                    class="flex items-center"
+                  >
+                    <el-radio label="0" size="large">是</el-radio>
+                    <el-radio label="1" size="large">否</el-radio>
+                  </el-radio-group>
+                </div>
               </el-form-item>
             </el-form>
           </div>
@@ -267,7 +295,7 @@ const handleSortChange = (value: string | number) => {
                       style="width: 240px"
                     >
                       <el-option
-                        v-for="item in typeData"
+                        v-for="item in articleType"
                         :key="item.value"
                         :label="item.label"
                         :value="item.value"
@@ -315,7 +343,7 @@ const handleSortChange = (value: string | number) => {
         <template #footer>
           <span class="dialog-footer" v-show="popBoxTit !== '查看'">
             <el-button @click="handleClose">取消</el-button>
-            <el-button type="primary" @click="save">保存</el-button>
+            <el-button type="primary" @click="prefabricationGO">保存</el-button>
           </span>
         </template>
       </el-dialog>

@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-10-11 13:16:25
- * @LastEditTime: 2024-11-28 15:48:29
+ * @LastEditTime: 2024-12-02 19:55:00
  */
 // PC
 
@@ -45,6 +45,19 @@ export interface articleInsert {
   source: string;
   title: string;
   content: string;
+  spoken: string;
+  type: string;
+  user: string;
+  commission: string;
+}
+
+export interface articlePostInSql {
+  post_max: number;
+  group: string;
+  platform: string;
+  isSecondary: string;
+  isAI: string;
+  sortID: string;
   spoken: string;
   type: string;
   user: string;
