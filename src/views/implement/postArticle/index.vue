@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-12-03 17:13:36
+ * @LastEditTime: 2024-12-04 16:02:06
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -23,7 +23,7 @@ const platforOptions = ref<any[]>([]);
 const sortgo = ref<any[]>([]);
 
 const infoRef = ref<any>({
-  post_max: "300",
+  post_max: "",
   group: "all",
   platform: "",
   isSecondary: "1",
@@ -170,14 +170,14 @@ const handleSortChange = (value: string | number) => {
             预制
           </el-button>
         </el-col>
-        <el-col :span="4">
+        <!-- <el-col :span="4">
           <div class="grid-content ep-bg-purple" />
           <el-button type="primary" plain @click="readyMade">AI现成</el-button>
         </el-col>
         <el-col :span="4">
           <div class="grid-content ep-bg-purple" />
           <el-button type="primary" plain @click="custom">自定义</el-button>
-        </el-col>
+        </el-col> -->
       </el-row>
 
       <!-- 发帖弹框 -->
