@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-28 20:34:12
+ * @LastEditTime: 2024-12-05 21:42:14
 -->
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
@@ -11,6 +11,7 @@ import { articleList, delGo, addGo, aiAddGo } from "./articleJS";
 import { formatisAI, formatCommission } from "@/utils/Formatter/index";
 import { useAiPromptHook } from "@/store/modules/aiPrompt";
 import { useCategoryformsHook } from "@/store/modules/category";
+import { sourceData, articleType, naturalLanguages } from "@/utils/constants";
 
 const categoryFormsStore = useCategoryformsHook();
 
@@ -48,31 +49,6 @@ const infoRef = ref<any>({
   spoken: "",
 });
 
-const sourceData = [
-  {
-    value: "openAI",
-    label: "openAI",
-  },
-  {
-    value: "OllamaAI",
-    label: "OllamaAI",
-  },
-];
-const typeData = [
-  {
-    value: "Markdown",
-    label: "Markdown",
-  },
-  {
-    value: "Html",
-    label: "Html",
-  },
-  {
-    value: "Text",
-    label: "Text",
-  },
-];
-
 // 接口相关
 const initData = async () => {
   loading.value = true;
@@ -84,7 +60,7 @@ const initData = async () => {
     ]);
     listDatas.value = listData;
     promptDatas.value = AiPromptStore.aiPromptList;
-    // console.log("promptDatas.value", promptDatas.value);
+    console.log("listDatas.value", listDatas.value);
     const categoryGroups = new Map();
     const categoryD = categoryFormsStore.categoryforms;
     categoryD.forEach((item) => {
@@ -343,7 +319,13 @@ const getPromptName = (promptID: string | number) => {
               <el-table-column prop="source" label="来源" align="center" />
               <el-table-column prop="title" label="标题" align="center" />
               <el-table-column prop="type" label="文章类型" align="center" />
-              <el-table-column prop="spoken" label="语言" align="center" />
+              <el-table-column label="语言" align="center">
+                <template #default="{ row }">
+                  <!-- 动态判断优先显示 spoken 或 language -->
+                  <span v-if="row.spoken">{{ row.spoken }}</span>
+                  <span v-else="row.language">{{ row.language }}</span>
+                </template>
+              </el-table-column>
               <el-table-column prop="user" label="用户" align="center" />
               <el-table-column
                 prop="commission"
@@ -449,7 +431,19 @@ const getPromptName = (promptID: string | number) => {
                 class="form_item"
                 v-show="infoRef.isAI === '1'"
               >
-                <el-input v-model="infoRef.spoken" autocomplete="off" />
+                <!-- <el-input v-model="infoRef.spoken" autocomplete="off" /> -->
+                <el-select
+                  v-model="infoRef.spoken"
+                  placeholder="Select"
+                  style="width: 240px"
+                >
+                  <el-option
+                    v-for="item in naturalLanguages"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
+                </el-select>
               </el-form-item>
 
               <el-form-item label="文章类型" class="form_item">
@@ -459,7 +453,7 @@ const getPromptName = (promptID: string | number) => {
                   style="width: 240px"
                 >
                   <el-option
-                    v-for="item in typeData"
+                    v-for="item in articleType"
                     :key="item.value"
                     :label="item.label"
                     :value="item.value"
@@ -527,7 +521,7 @@ const getPromptName = (promptID: string | number) => {
             <!-- AI -->
             <el-form
               :model="infoRef"
-              v-show="infoRef.isAI === '0' && popBoxTit !== '查看'"
+              v-show="infoRef.isAI === '0' || popBoxTit !== '查看'"
             >
               <el-form-item class="form_item">
                 <span>使用说明：</span>
@@ -568,10 +562,32 @@ const getPromptName = (promptID: string | number) => {
                 :key="field"
                 :label="field"
               >
-                <el-input
+                <!-- <el-input
                   v-model="inputValues[field]"
                   :placeholder="'请输入 ' + field"
-                />
+                /> -->
+
+                <!-- 判断是否是 'language' 字段，动态渲染不同的输入控件 -->
+                <template v-if="field === 'language'">
+                  <el-select
+                    v-model="inputValues[field]"
+                    placeholder="请选择语言"
+                    style="width: 240px"
+                  >
+                    <el-option
+                      v-for="item in naturalLanguages"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    />
+                  </el-select>
+                </template>
+                <template v-else>
+                  <el-input
+                    v-model="inputValues[field]"
+                    :placeholder="'请输入 ' + field"
+                  />
+                </template>
               </el-form-item>
 
               <!-- AI -->

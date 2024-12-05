@@ -2,12 +2,12 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-12-04 16:02:06
+ * @LastEditTime: 2024-12-05 21:41:52
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { postInSqlGo } from "./postArticleJS";
-import { articleType } from "@/utils/constants";
+import { articleType, naturalLanguages } from "@/utils/constants";
 import { useCategoryformsHook } from "@/store/modules/category";
 import { useSupportedPlatformsHook } from "@/store/modules/public";
 const supportedPlatformsStore = useSupportedPlatformsHook();
@@ -88,15 +88,15 @@ const prefabrication = () => {
   dialogFormVisible.value = true;
 };
 
-const readyMade = () => {
-  popBoxTit.value = "AI生成";
-  dialogFormVisible.value = true;
-};
-const custom = () => {
-  // console.log("新增", infoRef.value);
-  popBoxTit.value = "自定义";
-  dialogFormVisible.value = true;
-};
+// const readyMade = () => {
+//   popBoxTit.value = "AI生成";
+//   dialogFormVisible.value = true;
+// };
+// const custom = () => {
+//   // console.log("新增", infoRef.value);
+//   popBoxTit.value = "自定义";
+//   dialogFormVisible.value = true;
+// };
 
 const handleClose = () => {
   resetInfo();
@@ -332,7 +332,18 @@ const handleSortChange = (value: string | number) => {
               <el-row class="row-bg" :gutter="20">
                 <el-col :span="8" v-show="popBoxTit !== 'AI现成'">
                   <el-form-item label="语言" class="form_item">
-                    <el-input v-model="articleRef.spoken" autocomplete="off" />
+                    <el-select
+                      v-model="infoRef.spoken"
+                      placeholder="Select"
+                      style="width: 240px"
+                    >
+                      <el-option
+                        v-for="item in naturalLanguages"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                      />
+                    </el-select>
                   </el-form-item>
                 </el-col>
               </el-row>
