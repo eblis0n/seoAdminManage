@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-11-14 15:32:55
+ * @LastEditTime: 2024-12-05 17:04:55
 -->
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
@@ -276,7 +276,7 @@ const handleCurrentChange = (val: number) => {
               />
               <el-table-column prop="status" label="任务状态" align="center" />
               <el-table-column
-                prop="created_at"
+                prop="create_at"
                 label="任务发布时间"
                 align="center"
               />

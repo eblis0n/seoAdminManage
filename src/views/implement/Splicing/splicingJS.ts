@@ -23,9 +23,7 @@ export async function splicingList() {
     const response = await splicingAPI.requestSplicingList();
     console.log("刷新list", response);
     const sortedData = response.sort((a: any, b: any) => {
-      return (
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
+      return new Date(b.create_at).getTime() - new Date(a.create_at).getTime();
     });
     return sortedData;
   } catch (error) {

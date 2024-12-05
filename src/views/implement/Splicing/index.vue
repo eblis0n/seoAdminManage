@@ -266,7 +266,7 @@ const handleCurrentChange = (val: number) => {
                 :formatter="formatGenre"
               />
               <el-table-column
-                prop="created_at"
+                prop="create_at"
                 label="添加时间"
                 align="center"
               />

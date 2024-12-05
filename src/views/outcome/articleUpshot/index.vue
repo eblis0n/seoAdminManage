@@ -1,18 +1,22 @@
 <!--
  * @version: 1.0.0
  * @Author: Eblis
- * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-12-05 17:04:03
+ * @Date: 2024-11-12 22:17:11
+ * @LastEditTime: 2024-12-05 17:05:05
 -->
+<!--
+ * @version: 1.0.0
+ * @Author: Eblis
+ * @Date: 2024-01-08 15:09:59
+ * @LastEditTime: 2024-11-14 15:32:30
+-->
+
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { ElMessage } from "element-plus";
-import { upshotList, totalGo, exportToExcelWrapper } from "../upshotJS";
-import { formatGenre } from "@/utils/Formatter/index";
-
+import { upshotList, exportToExcelWrapper } from "../upshotJS";
 const currentPage = ref(1); // 当前页码
 const pageSize = ref(10); // 每页显示的数据数量
-const totalVal = ref<number>(0);
 const listDatas = ref<any[]>([]);
 
 const loading = ref(false);
@@ -22,15 +26,10 @@ const initData = async () => {
   loading.value = true;
 
   try {
-    const [listData, totalData] = await Promise.all([
-      upshotList({ platform: "telegra" }),
-      totalGo({ platform: "telegra" }),
-    ]);
+    const [listData] = await Promise.all([upshotList({ platform: "article" })]);
     listDatas.value = listData;
-    totalVal.value = totalData;
   } catch (error) {
     console.error("获取数据失败", error);
-    ElMessage.error("获取数据失败");
   } finally {
     loading.value = false;
   }
@@ -39,20 +38,6 @@ const initData = async () => {
 onMounted(() => {
   initData();
 });
-
-const total = async () => {
-  loading.value = true;
-  try {
-    totalVal.value = await totalGo({ platform: "telegra" });
-    ElMessage.success("刷新成功");
-  } catch (error) {
-    console.error("获取总数失败", error);
-    ElMessage.error("获取总数失败");
-  } finally {
-    initData();
-    loading.value = false;
-  }
-};
 
 // 导出
 const exportData = async () => {
@@ -63,16 +48,14 @@ const exportData = async () => {
   loading.value = true;
   try {
     const data = {
-      title: "telegra",
+      title: "article",
       exportD: listDatas.value,
     };
-    const success = await exportToExcelWrapper(data);
+    const success = await exportToExcelWrapper(data); // 修改为调用包装函数
     if (success) {
-      ElMessage.success("导出成功");
-      await initData(); // 导出成功后重新加载数据
+      // 导出成功后重新加载数据
+      await initData();
     }
-  } catch (error) {
-    ElMessage.error("导出失败");
   } finally {
     loading.value = false;
   }
@@ -91,12 +74,6 @@ const handleCurrentChange = (val: number) => {
   <div class="web-container" v-loading="loading">
     <el-card shadow="never">
       <el-row class="row-bg">
-        <el-col :span="3">
-          <div class="grid-content ep-bg-purple" />
-          <el-button type="primary" plain @click="total">
-            总数 {{ totalVal }} 条，刷新
-          </el-button>
-        </el-col>
         <el-col :span="2">
           <div class="grid-content ep-bg-purple" />
           <el-button type="primary" plain @click="exportData">导出</el-button>
@@ -116,23 +93,13 @@ const handleCurrentChange = (val: number) => {
               "
             >
               <el-table-column prop="id" label="ID" align="center" />
-              <el-table-column
-                prop="url"
-                label="url"
-                align="center"
-                width="200"
-              />
+
               <el-table-column
                 prop="platform"
                 label="投放平台"
                 align="center"
               />
-              <el-table-column
-                prop="genre"
-                label="类型"
-                align="center"
-                :formatter="formatGenre"
-              />
+              <el-table-column prop="url" label="url" align="center" />
               <el-table-column
                 prop="create_at"
                 label="添加时间"
@@ -149,7 +116,7 @@ const handleCurrentChange = (val: number) => {
           v-model:page-size="pageSize"
           :page-sizes="[10, 20, 50, 100]"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="totalVal"
+          :total="listDatas.length"
           @current-change="handleCurrentChange"
           @size-change="handleSizeChange"
         />

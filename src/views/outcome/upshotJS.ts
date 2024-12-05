@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-20 20:34:59
- * @LastEditTime: 2024-11-11 15:59:43
+ * @LastEditTime: 2024-12-05 20:30:37
  */
 
 import { ElMessage } from "element-plus";
@@ -20,9 +20,7 @@ export async function upshotList(params: outcomeParams) {
     console.log("刷新list", response);
     // 对数据进行排序
     const sortedData = response.sort((a: any, b: any) => {
-      return (
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
+      return new Date(b.create_at).getTime() - new Date(a.create_at).getTime();
     });
     return sortedData;
   } catch (error) {
@@ -62,14 +60,25 @@ export async function exportToExcelWrapper(data: outcomeExportParams) {
     const success = await exportToExcel(data);
 
     if (success) {
-      // 收集所有URL
-      const urldatas = data.exportD.map((item) => item.url).join(",");
+      if (data.title === "article") { 
+        // 收集所有URL
+      const dataId = data.exportD.map((item) => item.id).join(",");
 
+      // 执行删除操作
+      await outcomeAPI.requesOutcomDeleteData({
+        platform: data.title,
+        urldatas: dataId,
+      });
+      }elis{
+// 收集所有URL
+      const urldatas = data.exportD.map((item) => item.url).join(",");
       // 执行删除操作
       await outcomeAPI.requesOutcomDeleteData({
         platform: data.title,
         urldatas: urldatas,
       });
+      }
+      
 
       ElMessage.success("导出成功并清除数据");
       return true;

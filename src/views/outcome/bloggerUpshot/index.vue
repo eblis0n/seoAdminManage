@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-11-12 22:17:11
- * @LastEditTime: 2024-11-23 15:46:48
+ * @LastEditTime: 2024-12-05 17:03:50
 -->
 <!--
  * @version: 1.0.0
@@ -132,7 +132,7 @@ const handleCurrentChange = (val: number) => {
                 :formatter="formatGenre"
               />
               <el-table-column
-                prop="created_at"
+                prop="create_at"
                 label="添加时间"
                 align="center"
               />
