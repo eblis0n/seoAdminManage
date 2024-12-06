@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-12-05 21:34:59
+ * @LastEditTime: 2024-12-05 22:30:18
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -132,6 +132,7 @@ const save = async () => {
 
     // 将 validPrompts 转换为字符串
     const promptString = JSON.stringify(validPrompts);
+    console.log("promptString:", promptString);
 
     // 修改
     if (popBoxTit.value === "修改") {
