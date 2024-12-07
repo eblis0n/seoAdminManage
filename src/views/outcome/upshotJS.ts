@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-20 20:34:59
- * @LastEditTime: 2024-12-05 20:30:37
+ * @LastEditTime: 2024-12-07 21:23:40
  */
 
 import { ElMessage } from "element-plus";
@@ -60,25 +60,24 @@ export async function exportToExcelWrapper(data: outcomeExportParams) {
     const success = await exportToExcel(data);
 
     if (success) {
-      if (data.title === "article") { 
+      if (data.title === "article") {
         // 收集所有URL
-      const dataId = data.exportD.map((item) => item.id).join(",");
+        const dataId = data.exportD.map((item) => item.id).join(",");
 
-      // 执行删除操作
-      await outcomeAPI.requesOutcomDeleteData({
-        platform: data.title,
-        urldatas: dataId,
-      });
-      }elis{
-// 收集所有URL
-      const urldatas = data.exportD.map((item) => item.url).join(",");
-      // 执行删除操作
-      await outcomeAPI.requesOutcomDeleteData({
-        platform: data.title,
-        urldatas: urldatas,
-      });
+        // 执行删除操作
+        await outcomeAPI.requesOutcomDeleteData({
+          platform: data.title,
+          urldatas: dataId,
+        });
+      } else {
+        // 收集所有URL
+        const urldatas = data.exportD.map((item) => item.url).join(",");
+        // 执行删除操作
+        await outcomeAPI.requesOutcomDeleteData({
+          platform: data.title,
+          urldatas: urldatas,
+        });
       }
-      
 
       ElMessage.success("导出成功并清除数据");
       return true;
