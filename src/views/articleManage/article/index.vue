@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-12-05 21:42:14
+ * @LastEditTime: 2024-12-07 23:53:12
 -->
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
@@ -60,7 +60,7 @@ const initData = async () => {
     ]);
     listDatas.value = listData;
     promptDatas.value = AiPromptStore.aiPromptList;
-    console.log("listDatas.value", listDatas.value);
+    // console.log("listDatas.value", listDatas.value);
     const categoryGroups = new Map();
     const categoryD = categoryFormsStore.categoryforms;
     categoryD.forEach((item) => {
@@ -110,7 +110,9 @@ const selectedPronoun = computed(() => {
 const inputFields = computed(() => {
   if (!selectedPronoun.value) return [];
   return (
-    selectedPronoun.value.match(/{(.*?)}/g)?.map((v) => v.slice(1, -1)) || []
+    selectedPronoun.value
+      .match(/{(.*?)}/g)
+      ?.map((v: string) => v.slice(1, -1)) || []
   );
 });
 
@@ -258,6 +260,7 @@ const resetInfo = async () => {
 };
 
 const handleSortChange = (value: string | number) => {
+  console.log("value", value);
   infoRef.value.sortID = value;
 };
 
