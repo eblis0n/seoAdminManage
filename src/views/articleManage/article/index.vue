@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-12-07 23:53:12
+ * @LastEditTime: 2024-12-08 00:14:12
 -->
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
@@ -508,7 +508,10 @@ const getPromptName = (promptID: string | number) => {
 
           <!-- 右侧编辑器 -->
           <div class="right-editor">
-            <el-form :model="infoRef" v-show="infoRef.isAI === '1'">
+            <el-form
+              :model="infoRef"
+              v-show="infoRef.isAI === '1' || popBoxTit === '查看'"
+            >
               <el-form-item label="正文" class="form_item">
                 <el-input
                   v-model="infoRef.content"
@@ -524,7 +527,7 @@ const getPromptName = (promptID: string | number) => {
             <!-- AI -->
             <el-form
               :model="infoRef"
-              v-show="infoRef.isAI === '0' || popBoxTit !== '查看'"
+              v-show="infoRef.isAI === '0' && popBoxTit !== '查看'"
             >
               <el-form-item class="form_item">
                 <span>使用说明：</span>
