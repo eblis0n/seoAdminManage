@@ -192,7 +192,5 @@ Thanks to all the contributors!
 
 
 
-## 插件安装
 
-npm install xlsx
 

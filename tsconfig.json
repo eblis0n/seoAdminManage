@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
     "typeRoots": [
-      "node_modules/@types"
+      "./node_modules/@types",
+      "./src/types"
     ],
-    "target": "esnext",
+    "target": "ESNext",
     "useDefineForClassFields": true,
-    "module": "esnext",
+    "module": "ESNext",
     "moduleResolution": "node",
     "strict": true,
     "noLib": false,
@@ -13,10 +14,12 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "lib": [
-      "esnext",
-      "dom"
+      "ES2020",
+      "ESNext",
+      "DOM",
+      "DOM.Iterable"
     ],
-    "baseUrl": ".",
+    "baseUrl": "./",
     "allowJs": true,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
@@ -27,17 +30,29 @@
     "paths": {
       "@/*": [
         "src/*"
+      ],
+      "#/*": [
+        "types/*"
+      ],
+      "components/*": [
+        "components/*"
+      ],
+      "styles/*": [
+        "styles/*"
       ]
     },
     "types": [
       "vite/client",
-      "element-plus/global"
+      "element-plus/global",
+      "@types/node",
     ]
   },
   "include": [
-    "mock/**/*.ts",
     "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
     "src/**/*.vue",
+    "mock/**/*.ts",
     "vite.config.ts"
   ],
   "exclude": [

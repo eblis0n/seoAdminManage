@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-12-08 00:14:12
+ * @LastEditTime: 2024-12-08 20:45:42
 -->
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
@@ -12,6 +12,9 @@ import { formatisAI, formatCommission } from "@/utils/Formatter/index";
 import { useAiPromptHook } from "@/store/modules/aiPrompt";
 import { useCategoryformsHook } from "@/store/modules/category";
 import { sourceData, articleType, naturalLanguages } from "@/utils/constants";
+import useClipboard from "vue-clipboard3";
+import { CopyDocument } from "@element-plus/icons-vue";
+const { toClipboard } = useClipboard();
 
 const categoryFormsStore = useCategoryformsHook();
 
@@ -131,6 +134,16 @@ watchEffect(() => {
   console.log("selectedPronoun:", selectedPronoun.value);
   console.log("inputFields:", inputFields.value);
 });
+
+// 复制
+const copy = async (textToCopy) => {
+  try {
+    await toClipboard(textToCopy);
+    console.log("Copied to clipboard");
+  } catch (e) {
+    console.error(e);
+  }
+};
 
 // // 添加
 const Add = () => {
@@ -406,6 +419,14 @@ const getPromptName = (promptID: string | number) => {
                 v-show="popBoxTit === '查看'"
               >
                 <el-input v-model="infoRef.title" autocomplete="off" />
+
+                <el-button
+                  type="primary"
+                  :icon="CopyDocument"
+                  plain
+                  style="margin-left: 10px"
+                  @click="copy(infoRef.title)"
+                ></el-button>
               </el-form-item>
               <el-form-item label="来源" class="form_item">
                 <!-- 当 infoRef.isAI === "1" 时，显示输入框 -->
@@ -513,6 +534,14 @@ const getPromptName = (promptID: string | number) => {
               v-show="infoRef.isAI === '1' || popBoxTit === '查看'"
             >
               <el-form-item label="正文" class="form_item">
+                <el-button
+                  type="primary"
+                  :icon="CopyDocument"
+                  plain
+                  style="margin-bottom: 10px"
+                  @click="copy(infoRef.content)"
+                ></el-button>
+
                 <el-input
                   v-model="infoRef.content"
                   autocomplete="off"
@@ -568,11 +597,6 @@ const getPromptName = (promptID: string | number) => {
                 :key="field"
                 :label="field"
               >
-                <!-- <el-input
-                  v-model="inputValues[field]"
-                  :placeholder="'请输入 ' + field"
-                /> -->
-
                 <!-- 判断是否是 'language' 字段，动态渲染不同的输入控件 -->
                 <template v-if="field === 'language'">
                   <el-select
