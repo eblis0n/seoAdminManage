@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-12-08 20:45:42
+ * @LastEditTime: 2024-12-08 23:01:40
 -->
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
@@ -136,7 +136,7 @@ watchEffect(() => {
 });
 
 // 复制
-const copy = async (textToCopy) => {
+const copy = async (textToCopy: string) => {
   try {
     await toClipboard(textToCopy);
     console.log("Copied to clipboard");

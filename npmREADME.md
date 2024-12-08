@@ -75,6 +75,7 @@ npm install xlsx --legacy-peer-deps
 ## 复制
 
 npm install vue-clipboard3 --legacy-peer-deps
+npm install --save-dev @types/vue-clipboard3
 
 
 3、 vite.config.ts 配置
