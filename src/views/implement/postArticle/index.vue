@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-12-05 21:41:52
+ * @LastEditTime: 2024-12-11 19:43:13
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -139,7 +139,7 @@ const resetInfo = async () => {
 
   infoRef.value = {
     post_max: "",
-    group: "",
+    group: "all",
     platform: "",
     isSecondary: "1",
   };
