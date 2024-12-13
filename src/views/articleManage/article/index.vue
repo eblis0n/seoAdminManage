@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-12-08 23:01:40
+ * @LastEditTime: 2024-12-13 14:40:39
 -->
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
@@ -177,7 +177,7 @@ const save = async () => {
         theme: infoRef.value.theme,
         Keywords: infoRef.value.Keywords,
         ATag: infoRef.value.ATag,
-        link: infoRef.value.tylinkpe,
+        link: infoRef.value.link,
         language: infoRef.value.language,
       };
       console.log("data", data);

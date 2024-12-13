@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-12-05 22:30:18
+ * @LastEditTime: 2024-12-12 23:57:53
 -->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
@@ -303,7 +303,7 @@ const removePromptInput = (index: number) => {
                   <!-- <span>使用说明：</span> -->
                   <p>
                     1、prompt 变量协议：主题：{theme}, 关键词：{Keywords}
-                    A标签链接：{Atab} 网图地址：{link} 语言：{language}
+                    A标签链接：{ATag} 网图地址：{link} 语言：{language}
                     作用：生成文章的时候进行实际替换
                   </p>
 
@@ -315,8 +315,8 @@ const removePromptInput = (index: number) => {
                     生成的文章结果为：prompt“这是一条测试数据”prompt
                   </p>
                   <p style="color: red">
-                    ps:如果 在 prompt 输入框中有使用 {theme}，{Keywords}，{Atab}
-                    ，{link} ，{language} 就务必要将对应 变量 同步填写到
+                    ps:如果 在 prompt 输入框中有使用 {theme},{Keywords},{ATag}
+                    ,{link} ,{language} 就务必要将对应 变量 同步填写到
                     左侧变量输入框中，否则生成文章时会被识别为字符
                   </p>
                 </div>
@@ -361,7 +361,7 @@ const removePromptInput = (index: number) => {
                   style="width: 80%"
                   :rows="4"
                   type="textarea"
-                  placeholder="请填写 右侧 使用到的{theme},{Keywords},{Atab},{link},{language}"
+                  placeholder="请填写 右侧 使用到的{theme},{Keywords},{ATag},{link},{language}"
                 />
               </el-form-item>
             </el-form>
