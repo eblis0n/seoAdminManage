@@ -2,7 +2,7 @@
  * @version: 1.0.0
  * @Author: Eblis
  * @Date: 2024-01-08 15:09:59
- * @LastEditTime: 2024-12-13 14:40:39
+ * @LastEditTime: 2024-12-13 22:21:42
 -->
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
@@ -573,6 +573,10 @@ const getPromptName = (promptID: string | number) => {
                   的煽情短文"},{"type":"1","promptdata":"https://baidu.com"}]
                   theme 输入"爱情"^"忧伤"language 输入"中文"^"英语" 就会生成 1篇
                   中文爱情，1篇 英语忧伤 的 文章
+                </p>
+                <p>
+                  2、ATag 输入框，输入 “webpic” 会通过pexels.com API 随机 从
+                  10张图中 去一张网图进行填充
                 </p>
               </el-form-item>
               <el-form-item label="prompt" class="form_item">
